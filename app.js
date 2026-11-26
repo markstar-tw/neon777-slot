@@ -1838,7 +1838,8 @@
     paytableModal.hidden = false;
   });
 
-  menuSecretCodeBtn.addEventListener("click", () => {
+  menuSecretCodeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
     closeMenu();
     mobileCodeInput.value = "";
     mobileCodeFeedback.textContent = "";

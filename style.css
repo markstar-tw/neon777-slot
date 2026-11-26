@@ -223,6 +223,10 @@ body {
   max-width: 380px;
 }
 
+#mobileCodeModal {
+  z-index: 95;
+}
+
 .mobile-code-form {
   display: flex;
   gap: 8px;
