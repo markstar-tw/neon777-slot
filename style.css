@@ -1211,16 +1211,126 @@ body {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   :root {
-    --symbol-h: 18px;
+    --symbol-h: 19px;
+  }
+
+  body {
+    padding: 10px 8px 28px;
+  }
+
+  button {
+    touch-action: manipulation;
+  }
+
+  .top-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .brand h1 {
+    font-size: 18px;
+  }
+
+  .icon-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .master-console {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .jackpot-display {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+
+  .jackpot-value {
+    font-size: 20px;
+  }
+
+  .meters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .credits-box {
+    grid-column: 1 / -1;
+  }
+
+  .meter-value {
+    font-size: 16px;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bet-controls {
+    justify-content: space-between;
+  }
+
+  .bet-controls .ctrl-btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  .spin-controls {
+    width: 100%;
+  }
+
+  .spin-controls .spin-btn {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mode-auto-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cabinet {
+    padding: 10px 8px;
+  }
+
+  .cabinet-head {
+    flex-wrap: wrap;
+  }
+
+  .reel-stage {
+    padding: 4px;
+  }
+
+  .reels-grid {
+    gap: 1px;
   }
 
   .symbol-cell {
     font-size: 11px;
   }
 
-  .controls {
-    justify-content: center;
+  .tw-flag-svg {
+    width: 13px;
+    height: 9px;
+  }
+
+  .eightball-drop {
+    font-size: 64px;
+  }
+
+  .dev-drawer {
+    left: 8px;
+    right: 8px;
+    top: 62px;
+    width: auto;
+    max-width: none;
+  }
+
+  .settle-stats-grid {
+    grid-template-columns: 1fr;
   }
 }
