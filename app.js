@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.023"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.024"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -202,6 +202,7 @@
   const changelogModal = document.getElementById("changelogModal");
   const closeChangelogBtn = document.getElementById("closeChangelogBtn");
   const changelogList = document.getElementById("changelogList");
+  const startLatestUpdates = document.getElementById("startLatestUpdates");
 
   const mobileCodeModal = document.getElementById("mobileCodeModal");
   const closeMobileCodeBtn = document.getElementById("closeMobileCodeBtn");
@@ -1152,31 +1153,46 @@
   }
 
   const CHANGELOG_ENTRIES = [
-    { ver: "v26.01.023", desc: "Bug 修復。" },
-    { ver: "v26.01.022", desc: "Bug 修復。" },
-    { ver: "v26.01.021", desc: "Bug 修復。" },
-    { ver: "v26.01.020", desc: "選單新增「更新資料表」與介面顯示最佳化。" },
-    { ver: "v26.01.019", desc: "Bug 修復。" },
-    { ver: "v26.01.018", desc: "調整國旗圖示等比例大小，與其他 Emoji 高度一致。" },
-    { ver: "v26.01.017", desc: "全站國旗圖示相容性最佳化。" },
-    { ver: "v26.01.016", desc: "調整 🎱 黑八同時出現機率。" },
-    { ver: "v26.01.015", desc: "機台名稱更新為「🎰 拉機 A」與「🎰 拉機 B」。" },
-    { ver: "v26.01.014", desc: "新增總餘額達 3,000,000,000,000,000 點終極通關結束機制。" },
-    { ver: "v26.01.013", desc: "Bug 修復。" },
-    { ver: "v26.01.012", desc: "調整最高炸彈出現率上限為 50%。" },
-    { ver: "v26.01.011", desc: "結算、失敗畫面與分享文案改為顯示「累計總贏分」。" },
-    { ver: "v26.01.010", desc: "Bug 修復。" },
-    { ver: "v26.01.007", desc: "新增非賭博免責聲明與相關連結。" },
-    { ver: "v26.01.006", desc: "新增手機全螢幕按鈕與介面最佳化。" },
-    { ver: "v26.01.004", desc: "新增手機橫向雙機並排專用排版。" },
-    { ver: "v26.01.001", desc: "導入 00.00.000 版本號系統。" }
+    { ver: "v26.01.024", time: "2026-11-27 03:22", desc: "改名為「更新日誌」並加入日期時間；開始畫面下方新增最新更新。" },
+    { ver: "v26.01.023", time: "2026-11-27 03:19", desc: "Bug 修復。" },
+    { ver: "v26.01.022", time: "2026-11-27 03:16", desc: "Bug 修復。" },
+    { ver: "v26.01.021", time: "2026-11-27 03:15", desc: "Bug 修復。" },
+    { ver: "v26.01.020", time: "2026-11-27 03:12", desc: "選單新增「更新日誌」與介面顯示最佳化。" },
+    { ver: "v26.01.019", time: "2026-11-27 02:55", desc: "Bug 修復。" },
+    { ver: "v26.01.018", time: "2026-11-27 02:52", desc: "調整國旗圖示等比例大小，與其他 Emoji 高度一致。" },
+    { ver: "v26.01.017", time: "2026-11-27 02:50", desc: "全站國旗圖示相容性最佳化。" },
+    { ver: "v26.01.016", time: "2026-11-27 02:37", desc: "調整 🎱 黑八同時出現機率。" },
+    { ver: "v26.01.015", time: "2026-11-27 02:29", desc: "機台名稱更新為「🎰 拉機 A」與「🎰 拉機 B」。" },
+    { ver: "v26.01.014", time: "2026-11-27 02:27", desc: "新增總餘額達 3,000,000,000,000,000 點終極通關結束機制。" },
+    { ver: "v26.01.013", time: "2026-11-27 02:22", desc: "Bug 修復。" },
+    { ver: "v26.01.012", time: "2026-11-27 02:16", desc: "調整最高炸彈出現率上限為 50%。" },
+    { ver: "v26.01.011", time: "2026-11-27 02:13", desc: "結算、失敗畫面與分享文案改為顯示「累計總贏分」。" },
+    { ver: "v26.01.010", time: "2026-11-27 02:06", desc: "Bug 修復。" },
+    { ver: "v26.01.007", time: "2026-11-27 01:50", desc: "新增非賭博免責聲明與相關連結。" },
+    { ver: "v26.01.006", time: "2026-11-27 01:48", desc: "新增手機全螢幕按鈕與介面最佳化。" },
+    { ver: "v26.01.004", time: "2026-11-27 01:42", desc: "新增手機橫向雙機並排專用排版。" },
+    { ver: "v26.01.001", time: "2026-11-27 01:35", desc: "導入 00.00.000 版本號系統。" }
   ];
 
   function renderChangelog() {
     changelogList.innerHTML = CHANGELOG_ENTRIES.map((item) => `
       <div class="changelog-item">
-        <span class="changelog-ver">${item.ver}</span>
+        <div class="changelog-head">
+          <span class="changelog-ver">${item.ver}</span>
+          <span class="changelog-time">${item.time}</span>
+        </div>
         <span class="changelog-desc">${formatTwFlags(item.desc)}</span>
+      </div>
+    `).join("");
+  }
+
+  function renderStartLatestUpdates() {
+    if (!startLatestUpdates) return;
+    startLatestUpdates.innerHTML = CHANGELOG_ENTRIES.slice(0, 3).map((item) => `
+      <div class="start-changelog-row">
+        <span class="changelog-ver">${item.ver}</span>
+        <span class="changelog-time">${item.time}</span>
+        <span>${formatTwFlags(item.desc)}</span>
       </div>
     `).join("");
   }
@@ -2222,6 +2238,7 @@
   const startVersionEl = document.getElementById("startVersionText");
   if (appVersionEl) appVersionEl.textContent = `v${APP_VERSION}`;
   if (startVersionEl) startVersionEl.textContent = `v${APP_VERSION}`;
+  renderStartLatestUpdates();
   renderPaytable();
   updateUI();
 })();
