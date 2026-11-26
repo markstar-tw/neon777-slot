@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>街霸拉機NEON777</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="top-bar">
+      <div class="brand">
+        <span class="brand-badge">DUAL 16×16</span>
+        <h1>街霸拉機NEON777</h1>
+      </div>
+      <div class="top-actions">
+        <button id="devPanelBtn" class="icon-btn dev-top-btn" type="button" hidden>
+          🛠️ 開發者
+        </button>
+        <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">
+          🔊 音效開
+        </button>
+        <div class="menu-wrap">
+          <button id="menuBtn" class="icon-btn menu-trigger" type="button" aria-expanded="false" aria-controls="gameMenu">
+            ☰ 選單
+          </button>
+          <div id="gameMenu" class="menu-dropdown" hidden>
+            <button id="menuSettleBtn" class="menu-item" type="button">🏁 結算並結束本局</button>
+            <button id="menuRestartBtn" class="menu-item" type="button">🔄 直接重啟（2,000 點）</button>
+            <button id="menuHomeBtn" class="menu-item" type="button">🏠 回到開始畫面</button>
+            <button id="menuPaytableBtn" class="menu-item" type="button">📋 查看賠率表</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 共用頂部總控儀表板 -->
+    <section class="master-console" aria-label="雙機總控台">
+      <div class="marquee">
+        <div class="marquee-lights" aria-hidden="true"></div>
+        <div class="jackpot-display">
+          <span class="jackpot-label">ULTRA GRAND JACKPOT</span>
+          <span id="ultraJackpotValue" class="jackpot-value">25,000</span>
+          <span class="jackpot-sub">任意開賭累積 • 單台雙 🇹🇼 直奪超終極大獎</span>
+        </div>
+      </div>
+
+      <div class="meters">
+        <div class="meter-box credits-box">
+          <span class="meter-label">總餘額 CREDITS（💣 <span id="bombRateLabel">9.7%</span>）</span>
+          <div class="meter-value-row">
+            <span id="creditsValue" class="meter-value">2,000</span>
+            <div id="creditsSpendStack" class="spend-stack" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="meter-box">
+          <span class="meter-label">單台押注 BET（各台可獨立設定）</span>
+          <div class="meter-value-row">
+            <span id="betValue" class="meter-value">🅰️:25 / 🅱️:25</span>
+            <span class="meter-cap">上限 <strong id="maxBetLabel">125</strong></span>
+          </div>
+        </div>
+        <div class="meter-box highlight">
+          <span class="meter-label">本輪總淨贏 NET</span>
+          <span id="winValue" class="meter-value">0</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="bet-controls" role="group" aria-label="押注調整">
+          <button id="betDownBtn" class="ctrl-btn" type="button">− 減注</button>
+          <button id="betUpBtn" class="ctrl-btn" type="button">+ 加注</button>
+          <button id="maxBetBtn" class="ctrl-btn" type="button">動態上限</button>
+        </div>
+
+        <div class="spin-controls">
+          <button id="burstSpinBtn" class="ctrl-btn burst-btn" type="button" title="連續自動轉 5 輪（省 10%）">
+            🔥 連轉 ×5（省10%）
+          </button>
+          <button id="spinAllBtn" class="spin-btn" type="button">
+            <span class="spin-main">雙機齊發</span>
+            <span class="spin-sub">省 5% • SPACE</span>
+          </button>
+        </div>
+
+        <div class="mode-auto-bar">
+          <div class="bet-mode-switch" role="group" aria-label="強制押注模式開關">
+            <span class="mode-switch-label">押注模式：</span>
+            <button class="ctrl-btn mode-btn active" type="button" data-bet-mode="normal">一般</button>
+            <button class="ctrl-btn mode-btn" type="button" data-bet-mode="max">強制最高押注</button>
+            <button class="ctrl-btn mode-btn" type="button" data-bet-mode="single_allin">第一台 ALL IN（關第二台）</button>
+            <button class="ctrl-btn mode-btn" type="button" data-bet-mode="second_allin">第二台 ALL IN（關第一台）</button>
+            <button class="ctrl-btn mode-btn" type="button" data-bet-mode="dual_allin">雙台 ALL IN（餘額/2）</button>
+          </div>
+          <div class="auto-cluster" role="group" aria-label="自動模式開關區">
+            <span class="mode-switch-label">自動模式：</span>
+            <button id="autoMachineABtn" class="ctrl-btn toggle auto-unit-btn" type="button" aria-pressed="false">🅰️ AUTO</button>
+            <button id="autoMachineBBtn" class="ctrl-btn toggle auto-unit-btn" type="button" aria-pressed="false">🅱️ AUTO</button>
+            <button id="autoSpinBtn" class="ctrl-btn toggle auto-unit-btn" type="button" aria-pressed="false">雙機 AUTO</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 兩台並排的 16x16 拉霸機 -->
+    <main id="dualCabinets" class="dual-cabinets" aria-label="雙機拉霸機區"></main>
+
+    <!-- 近期紀錄 -->
+    <section class="history-panel" aria-label="近期開獎紀錄">
+      <div class="history-header">
+        <h2>近期紀錄</h2>
+        <span id="spinCount" class="spin-count">總轉數：0</span>
+      </div>
+      <ul id="historyList" class="history-list">
+        <li class="history-empty">尚無遊玩紀錄，點擊「雙機齊發」或單台拉桿開始！</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- 開始畫面 Overlay -->
+  <div id="startScreen" class="overlay-screen">
+    <div class="overlay-card start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+      <span class="brand-badge">DUAL 16×16 ARCADE</span>
+      <h2 id="startTitle" class="overlay-title">街霸拉機NEON777</h2>
+      <p class="overlay-desc">雙機 16×16 街機拉霸！橫、直、左右斜線皆可兌獎（最高 8 連），各台獨立累積 GRAND JACKPOT，尋找極稀有 🇹🇼 與 🀄！</p>
+      <ul class="overlay-rules">
+        <li>💰 每次開局起始金額：<strong>2,000 點</strong></li>
+        <li>⚖️ 押注上限依目前餘額動態調整</li>
+        <li>🔥 支援雙機齊發（省5%）、單台轉動與連轉 ×5（省10%）</li>
+      </ul>
+      <div class="overlay-actions">
+        <button id="resumeGameBtn" class="ctrl-btn" type="button" hidden>▶ 返回當前遊戲</button>
+        <button id="startGameBtn" class="spin-btn overlay-primary-btn" type="button">
+          <span class="spin-main">開始新遊戲</span>
+          <span class="spin-sub">START WITH 2,000</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 失敗重啟畫面 Overlay -->
+  <div id="gameOverScreen" class="overlay-screen" hidden>
+    <div class="overlay-card gameover-card" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+      <span class="gameover-badge">GAME OVER</span>
+      <h2 id="gameOverTitle" class="overlay-title danger">挑戰失敗！點數歸零</h2>
+      <p id="gameOverStats" class="overlay-desc">本局共進行 0 輪轉動，餘額已用盡。</p>
+      <div class="overlay-actions">
+        <button id="gameOverShareXBtn" class="ctrl-btn" type="button">𝕏 分享到 X</button>
+        <button id="gameOverShareThreadsBtn" class="ctrl-btn" type="button">🧵 分享到 Threads</button>
+        <button id="gameOverShareOtherBtn" class="ctrl-btn toggle" type="button">📤 其他分享</button>
+        <button id="gameOverRestartBtn" class="spin-btn overlay-primary-btn" type="button">
+          <span class="spin-main">重新開始</span>
+          <span class="spin-sub">RESET TO 2,000</span>
+        </button>
+        <button id="gameOverHomeBtn" class="ctrl-btn" type="button">🏠 回到開始畫面</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 結算結束畫面 Overlay（不可再繼續，僅可下載圖片或重新開始） -->
+  <div id="settlementScreen" class="overlay-screen" hidden>
+    <div class="overlay-card settle-card" role="dialog" aria-modal="true" aria-labelledby="settleTitle">
+      <span class="brand-badge">FINAL SETTLEMENT</span>
+      <h2 id="settleTitle" class="overlay-title">本局結算報告</h2>
+      <div id="settleStatsGrid" class="settle-stats-grid"></div>
+      <div class="overlay-actions">
+        <button id="downloadSettleImgBtn" class="ctrl-btn burst-btn" type="button">📸 下載結算圖片</button>
+        <button id="shareXBtn" class="ctrl-btn" type="button">𝕏 分享到 X</button>
+        <button id="shareThreadsBtn" class="ctrl-btn" type="button">🧵 分享到 Threads</button>
+        <button id="shareSettleBtn" class="ctrl-btn toggle" type="button">📤 其他分享</button>
+        <button id="settleRestartBtn" class="spin-btn overlay-primary-btn" type="button">
+          <span class="spin-main">重新開始</span>
+          <span class="spin-sub">NEW GAME • 2,000</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 賠率表 Modal -->
+  <div id="paytableModal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="paytableTitle">
+      <div class="modal-header">
+        <h2 id="paytableTitle">賠率表 PAYTABLE</h2>
+        <button id="closePaytableBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
+      </div>
+      <p class="modal-note">每台皆為 16×16 盤面，<strong>橫列、直行、左右斜線</strong>出現連續 3 顆以上相同符號即可兌獎（最高 8 連）；出現 3 連以上 💣 炸彈會扣獎金（不扣本金）；出現 1 顆 <strong>🎱 黑八</strong> 失去該台獎金（獎池與餘額保留），若單台同時出現 <strong>2 顆以上 🎱</strong> 則直接判定遊戲結束；稀有 <strong>🀄 紅中</strong> 依當前押注上限送大紅包（最低 1,000）；<strong>🇹🇼</strong> 1 顆中該台 GRAND、2 顆分開中 GRAND+10%、2 顆相連直奪 <strong>ULTRA GRAND JACKPOT</strong>，3 顆再加送 GRAND 的 50%！</p>
+      <div id="paytableBody" class="paytable-grid"></div>
+    </div>
+  </div>
+
+  <!-- 開發人員面板（輸入 SUPERHERO 解鎖，固定於左側） -->
+  <aside id="devPanelModal" class="dev-drawer" hidden aria-label="開發人員面板">
+    <div class="modal-card dev-card" role="dialog" aria-labelledby="devPanelTitle">
+      <div class="modal-header">
+        <h2 id="devPanelTitle">🛠️ 開發人員面板（SUPERHERO）</h2>
+        <button id="closeDevPanelBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
+      </div>
+      <div id="devStatsBox" class="dev-stats"></div>
+      <div class="dev-section">
+        <h3>數值與系統開關</h3>
+        <div class="dev-btn-grid">
+          <button id="devAdd10kBtn" class="ctrl-btn" type="button">+10,000 餘額</button>
+          <button id="devAdd100kBtn" class="ctrl-btn" type="button">+100,000 餘額</button>
+          <button id="devReset2kBtn" class="ctrl-btn" type="button">餘額重設 2,000</button>
+          <button id="devSet1Btn" class="ctrl-btn" type="button">餘額設為 1</button>
+          <button id="devBoostUltraBtn" class="ctrl-btn" type="button">+50,000 超終極獎池</button>
+          <button id="devBoostMachinesBtn" class="ctrl-btn" type="button">雙台獎池 +10,000</button>
+          <button id="devFastSpinBtn" class="ctrl-btn toggle" type="button">⚡ 極速轉輪：關</button>
+          <button id="devGodModeBtn" class="ctrl-btn toggle" type="button">🛡️ 防黑八護盾：關</button>
+          <button id="devBombShieldBtn" class="ctrl-btn toggle" type="button">🛡️ 炸彈護盾：關</button>
+          <button id="devClearPendingBtn" class="ctrl-btn" type="button">🧹 清除待命強制項目</button>
+        </div>
+      </div>
+      <div class="dev-section">
+        <h3>暗語清單（鍵盤輸入或點擊直接激活）</h3>
+        <div id="devCodesList" class="dev-codes-list"></div>
+      </div>
+    </div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>
