@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.001"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.002"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感

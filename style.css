@@ -242,10 +242,12 @@ body {
   border: 1px solid rgba(45, 226, 230, 0.5);
   background: #0c0f1d;
   color: var(--gold-bright);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .mobile-code-submit {
@@ -1256,13 +1258,23 @@ body {
   }
 }
 
+@media (max-width: 980px), (pointer: coarse) {
+  .mobile-only {
+    display: block;
+  }
+}
+
 @media (max-width: 640px) {
   :root {
-    --symbol-h: 19px;
+    --symbol-h: 15px;
   }
 
   body {
-    padding: 10px 8px 28px;
+    padding: 6px 6px 20px;
+  }
+
+  .app-shell {
+    gap: 8px;
   }
 
   button {
@@ -1271,35 +1283,52 @@ body {
 
   .top-bar {
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
 
   .brand h1 {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .icon-btn {
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 5px 8px;
+    font-size: 11px;
   }
 
   .master-console {
-    padding: 10px;
-    gap: 10px;
+    padding: 8px;
+    gap: 6px;
+    border-radius: 14px;
+  }
+
+  .marquee {
+    padding: 5px 10px;
   }
 
   .jackpot-display {
     flex-wrap: wrap;
-    gap: 4px 10px;
+    gap: 2px 8px;
   }
 
   .jackpot-value {
-    font-size: 20px;
+    font-size: 18px;
+  }
+
+  .jackpot-sub {
+    font-size: 10px;
   }
 
   .meters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 6px;
+  }
+
+  .meter-box {
+    padding: 5px 8px;
+  }
+
+  .meter-label {
+    font-size: 10px;
   }
 
   .credits-box {
@@ -1307,47 +1336,76 @@ body {
   }
 
   .meter-value {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 6px;
   }
 
   .bet-controls {
     justify-content: space-between;
+    gap: 4px;
   }
 
   .bet-controls .ctrl-btn {
     flex: 1;
+    padding: 6px 6px;
+    font-size: 11px;
     text-align: center;
   }
 
   .spin-controls {
     width: 100%;
+    gap: 6px;
   }
 
   .spin-controls .spin-btn {
     flex: 1;
     min-width: 0;
+    padding: 7px 10px;
+  }
+
+  .spin-main {
+    font-size: 14px;
   }
 
   .mode-auto-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 6px;
+    padding-top: 6px;
+  }
+
+  .mode-btn,
+  .auto-unit-btn {
+    padding: 4px 7px;
+    font-size: 11px;
+  }
+
+  .dual-cabinets {
+    gap: 8px;
   }
 
   .cabinet {
-    padding: 10px 8px;
+    padding: 8px 6px;
+    gap: 6px;
+    border-radius: 14px;
   }
 
   .cabinet-head {
     flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .machine-bet-bar {
+    padding: 4px 8px;
   }
 
   .reel-stage {
-    padding: 4px;
+    padding: 3px;
   }
 
   .reels-grid {
@@ -1355,22 +1413,28 @@ body {
   }
 
   .symbol-cell {
-    font-size: 11px;
+    font-size: 9.5px;
   }
 
   .tw-flag-svg {
-    width: 13px;
-    height: 9px;
+    width: 11px;
+    height: 8px;
+  }
+
+  .status-banner {
+    padding: 5px 8px;
+    font-size: 11px;
+    min-height: 28px;
   }
 
   .eightball-drop {
-    font-size: 64px;
+    font-size: 54px;
   }
 
   .dev-drawer {
-    left: 8px;
-    right: 8px;
-    top: 62px;
+    left: 6px;
+    right: 6px;
+    top: 56px;
     width: auto;
     max-width: none;
   }
@@ -1384,19 +1448,19 @@ body {
   }
 
   body.mobile-big-controls .spin-btn {
-    padding: 15px 20px;
+    padding: 13px 16px;
   }
 
   body.mobile-big-controls .ctrl-btn {
-    padding: 12px 10px;
-    font-size: 14px;
+    padding: 10px 8px;
+    font-size: 13px;
   }
 
   body.mobile-compact-grid {
-    --symbol-h: 16px;
+    --symbol-h: 13px;
   }
 
   body.mobile-compact-grid .symbol-cell {
-    font-size: 10px;
+    font-size: 8px;
   }
 }
