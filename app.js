@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.013"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.014"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -21,6 +21,7 @@
   ];
 
   const INITIAL_CREDITS = 2000;
+  const MAX_WIN_CREDITS = 3000000000000000; // 達到 3,000,000,000,000,000 直接通關結束
   const INITIAL_ULTRA_JACKPOT = 25000;
   const MIN_BET = 5;
 
@@ -203,6 +204,7 @@
   const devMobileCompactBtn = document.getElementById("devMobileCompactBtn");
 
   const settlementScreen = document.getElementById("settlementScreen");
+  const settleTitle = document.getElementById("settleTitle");
   const settleStatsGrid = document.getElementById("settleStatsGrid");
   const downloadSettleImgBtn = document.getElementById("downloadSettleImgBtn");
   const shareXBtn = document.getElementById("shareXBtn");
@@ -1251,11 +1253,12 @@
     ];
   }
 
-  function openSettlement() {
+  function openSettlement(customTitle = "本局結算報告") {
     if (anySpinning()) return;
     stopAutoAndBurst();
     closeMenu();
     state.isSettled = true;
+    settleTitle.textContent = customTitle;
     const rows = getSettlementRows();
     settleStatsGrid.innerHTML = rows.map((r) => `
       <div class="settle-stat-item">
@@ -1265,6 +1268,14 @@
     `).join("");
     settlementScreen.hidden = false;
     updateUI();
+  }
+
+  function checkMaxWinEnding() {
+    if (!anySpinning() && state.credits >= MAX_WIN_CREDITS) {
+      openSettlement("🏆 達成 3,000,000,000,000,000 傳說通關！");
+      return true;
+    }
+    return false;
   }
 
   function downloadSettlementImage() {
@@ -1551,6 +1562,8 @@
       return;
     }
 
+    if (checkMaxWinEnding()) return;
+
     if (!state.isBurstSession && checkGameOver()) return;
 
     // 若單台 AUTO 正在轉動中且玩家開啟了雙 AUTO，等該台這輪跑完後切換為兩台一起 AUTO
@@ -1808,7 +1821,7 @@
     }
   }
 
-  menuSettleBtn.addEventListener("click", openSettlement);
+  menuSettleBtn.addEventListener("click", () => openSettlement());
 
   downloadSettleImgBtn.addEventListener("click", downloadSettlementImage);
 
