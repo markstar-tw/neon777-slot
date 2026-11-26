@@ -780,11 +780,19 @@ body {
   transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.tw-flag-svg {
-  width: 18px;
-  height: 13px;
+.tw-flag-img {
+  height: 1.05em;
+  width: auto;
+  vertical-align: -0.15em;
   border-radius: 2px;
+  display: inline-block;
   box-shadow: 0 0 4px rgba(255, 255, 255, 0.35);
+}
+
+.symbol-cell .tw-flag-img {
+  width: 18px;
+  height: 12px;
+  vertical-align: middle;
   display: block;
 }
 
@@ -1435,7 +1443,7 @@ body {
     font-size: 9.5px;
   }
 
-  .tw-flag-svg {
+  .symbol-cell .tw-flag-img {
     width: 11px;
     height: 8px;
   }
@@ -1633,7 +1641,7 @@ body {
     font-size: 8.5px;
   }
 
-  .tw-flag-svg {
+  .symbol-cell .tw-flag-img {
     width: 10px;
     height: 7px;
   }

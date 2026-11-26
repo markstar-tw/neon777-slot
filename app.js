@@ -25,7 +25,11 @@
   const INITIAL_ULTRA_JACKPOT = 25000;
   const MIN_BET = 5;
 
-  const TW_FLAG_HTML = `<img class="tw-flag-svg" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" draggable="false" />`;
+  const TW_FLAG_HTML = `<img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" />`;
+
+  function formatTwFlags(text) {
+    return String(text).replaceAll("🇹🇼", TW_FLAG_HTML);
+  }
 
   function renderSymbolIcon(sym) {
     return sym.id === "tw" ? TW_FLAG_HTML : sym.icon;
@@ -697,7 +701,7 @@
       },
 
       setStatus(msg, mode = "normal") {
-        statusEl.textContent = msg;
+        statusEl.innerHTML = formatTwFlags(msg);
         statusEl.className = "status-banner";
         if (mode !== "normal") statusEl.classList.add(mode);
       },
@@ -1130,7 +1134,7 @@
       <div class="dev-code-row">
         <div class="dev-code-info">
           <span class="dev-code-key">${item.code}</span>
-          <span class="dev-code-desc">${item.desc}</span>
+          <span class="dev-code-desc">${formatTwFlags(item.desc)}</span>
         </div>
         ${item.hideActivate ? "" : `<button class="ctrl-btn dev-activate-btn" type="button" data-code="${item.code}">⚡ 激活</button>`}
       </div>
@@ -1148,11 +1152,11 @@
       state.secretDoubleBlackPending && "🎱🎱 單台2黑八"
     ].filter(Boolean);
 
-    devStatsBox.innerHTML = `
+    devStatsBox.innerHTML = formatTwFlags(`
       餘額：<strong>${state.credits.toLocaleString()}</strong> ｜ 動態押注上限：<strong>${getDynamicMaxBet(machines.length)}</strong><br>
       💣 炸彈權重：<strong>${getDynamicBombWeight()}</strong>（${getBombRatePercent()}%）<br>
       下一轉強制項目：<strong>${pendingList.length ? pendingList.join("、") : "無"}</strong>
-    `;
+    `);
 
     devFastSpinBtn.classList.toggle("active", state.devFastSpin);
     devFastSpinBtn.textContent = state.devFastSpin ? "⚡ 極速轉輪：開" : "⚡ 極速轉輪：關";
