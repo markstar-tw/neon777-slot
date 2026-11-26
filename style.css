@@ -215,6 +215,47 @@ body {
   white-space: nowrap;
 }
 
+.mobile-only {
+  display: none;
+}
+
+.mobile-code-card {
+  max-width: 380px;
+}
+
+.mobile-code-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.mobile-code-input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(45, 226, 230, 0.5);
+  background: #0c0f1d;
+  color: var(--gold-bright);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mobile-code-submit {
+  min-width: 76px;
+  padding: 10px 14px;
+}
+
+.mobile-code-feedback {
+  margin-top: 8px;
+  font-size: 12px;
+  min-height: 18px;
+  color: var(--neon-cyan);
+}
+
 .icon-btn {
   background: var(--bg-panel);
   color: var(--text-main);
@@ -1332,5 +1373,26 @@ body {
 
   .settle-stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  body.mobile-big-controls .spin-btn {
+    padding: 15px 20px;
+  }
+
+  body.mobile-big-controls .ctrl-btn {
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+
+  body.mobile-compact-grid {
+    --symbol-h: 16px;
+  }
+
+  body.mobile-compact-grid .symbol-cell {
+    font-size: 10px;
   }
 }

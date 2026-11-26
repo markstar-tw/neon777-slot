@@ -108,6 +108,9 @@
     devFastSpin: false,
     devGodMode: false,
     devBombShield: false,
+    devMobileVibrate: true,
+    devMobileBigBtn: false,
+    devMobileCompact: false,
     devUnlocked: false,
     soundEnabled: true
   };
@@ -183,7 +186,18 @@
   const menuRestartBtn = document.getElementById("menuRestartBtn");
   const menuHomeBtn = document.getElementById("menuHomeBtn");
   const menuPaytableBtn = document.getElementById("menuPaytableBtn");
+  const menuSecretCodeBtn = document.getElementById("menuSecretCodeBtn");
   const devPanelBtn = document.getElementById("devPanelBtn");
+
+  const mobileCodeModal = document.getElementById("mobileCodeModal");
+  const closeMobileCodeBtn = document.getElementById("closeMobileCodeBtn");
+  const mobileCodeInput = document.getElementById("mobileCodeInput");
+  const mobileCodeSubmitBtn = document.getElementById("mobileCodeSubmitBtn");
+  const mobileCodeFeedback = document.getElementById("mobileCodeFeedback");
+
+  const devMobileVibrateBtn = document.getElementById("devMobileVibrateBtn");
+  const devMobileBigBtn = document.getElementById("devMobileBigBtn");
+  const devMobileCompactBtn = document.getElementById("devMobileCompactBtn");
 
   const settlementScreen = document.getElementById("settlementScreen");
   const settleStatsGrid = document.getElementById("settleStatsGrid");
@@ -1141,6 +1155,14 @@
     devGodModeBtn.textContent = state.devGodMode ? "🛡️ 防黑八護盾：開" : "🛡️ 防黑八護盾：關";
     devBombShieldBtn.classList.toggle("active", state.devBombShield);
     devBombShieldBtn.textContent = state.devBombShield ? "🛡️ 炸彈護盾：開" : "🛡️ 炸彈護盾：關";
+    devMobileVibrateBtn.classList.toggle("active", state.devMobileVibrate);
+    devMobileVibrateBtn.textContent = state.devMobileVibrate ? "📳 震動回饋：開" : "📳 震動回饋：關";
+    devMobileBigBtn.classList.toggle("active", state.devMobileBigBtn);
+    devMobileBigBtn.textContent = state.devMobileBigBtn ? "🖐️ 單手大按鈕：開" : "🖐️ 單手大按鈕：關";
+    devMobileCompactBtn.classList.toggle("active", state.devMobileCompact);
+    devMobileCompactBtn.textContent = state.devMobileCompact ? "📐 緊湊盤面：開" : "📐 緊湊盤面：關";
+    document.body.classList.toggle("mobile-big-controls", state.devMobileBigBtn);
+    document.body.classList.toggle("mobile-compact-grid", state.devMobileCompact);
   }
 
   function unlockDevPanel() {
@@ -1485,6 +1507,10 @@
       state.lastNetWin = combinedNet;
     }
 
+    if (maxWinCells > 0 && state.devMobileVibrate && navigator.vibrate) {
+      navigator.vibrate(anyJackpot || anyUltraJackpot ? [60, 40, 120] : 40);
+    }
+
     if (anyMahjong || anyUltraJackpot) {
       setTimeout(() => playSpecialSound(), Math.min(maxWinCells * CONNECT_STEP_MS, 600));
     } else if (combinedNet > 0 && maxWinCells === 0) {
@@ -1812,6 +1838,61 @@
     paytableModal.hidden = false;
   });
 
+  menuSecretCodeBtn.addEventListener("click", () => {
+    closeMenu();
+    mobileCodeInput.value = "";
+    mobileCodeFeedback.textContent = "";
+    mobileCodeModal.hidden = false;
+    setTimeout(() => mobileCodeInput.focus(), 50);
+  });
+
+  closeMobileCodeBtn.addEventListener("click", () => {
+    mobileCodeModal.hidden = true;
+  });
+
+  mobileCodeModal.addEventListener("click", (e) => {
+    if (e.target === mobileCodeModal) mobileCodeModal.hidden = true;
+  });
+
+  function submitMobileSecretCode() {
+    const code = mobileCodeInput.value.trim().toUpperCase();
+    if (!code) return;
+    const matched = SECRET_CODES.find((item) => item.code === code);
+    if (matched) {
+      matched.run();
+      refreshDevPanel();
+      mobileCodeInput.value = "";
+      mobileCodeModal.hidden = true;
+    } else {
+      mobileCodeFeedback.textContent = "❌ 無效的密技代碼";
+    }
+  }
+
+  mobileCodeSubmitBtn.addEventListener("click", submitMobileSecretCode);
+
+  mobileCodeInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      submitMobileSecretCode();
+    }
+  });
+
+  devMobileVibrateBtn.addEventListener("click", () => {
+    state.devMobileVibrate = !state.devMobileVibrate;
+    if (state.devMobileVibrate && navigator.vibrate) navigator.vibrate(50);
+    refreshDevPanel();
+  });
+
+  devMobileBigBtn.addEventListener("click", () => {
+    state.devMobileBigBtn = !state.devMobileBigBtn;
+    refreshDevPanel();
+  });
+
+  devMobileCompactBtn.addEventListener("click", () => {
+    state.devMobileCompact = !state.devMobileCompact;
+    refreshDevPanel();
+  });
+
   devPanelBtn.addEventListener("click", () => {
     if (!state.devUnlocked) return;
     closeMenu();
@@ -1940,12 +2021,14 @@
       !startScreen.hidden ||
       !gameOverScreen.hidden ||
       !settlementScreen.hidden ||
+      !mobileCodeModal.hidden ||
       !paytableModal.hidden;
     if (e.code === "Space" && !anyOverlayOpen && !anyAutoActive() && !state.isSettled) {
       e.preventDefault();
       runSpin(machines);
     } else if (e.code === "Escape") {
       if (!paytableModal.hidden) paytableModal.hidden = true;
+      if (!mobileCodeModal.hidden) mobileCodeModal.hidden = true;
       if (!devPanelModal.hidden) devPanelModal.hidden = true;
       if (!gameMenu.hidden) closeMenu();
     }

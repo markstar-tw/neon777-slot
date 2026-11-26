@@ -41,6 +41,7 @@
             <button id="menuRestartBtn" class="menu-item" type="button">🔄 直接重啟（2,000 點）</button>
             <button id="menuHomeBtn" class="menu-item" type="button">🏠 回到開始畫面</button>
             <button id="menuPaytableBtn" class="menu-item" type="button">📋 查看賠率表</button>
+            <button id="menuSecretCodeBtn" class="menu-item mobile-only" type="button">🔑 輸入密技（手機版）</button>
           </div>
         </div>
       </div>
@@ -225,12 +226,38 @@
           <button id="devClearPendingBtn" class="ctrl-btn" type="button">🧹 清除待命強制項目</button>
         </div>
       </div>
+      <div class="dev-section mobile-only">
+        <h3>📱 手機版專用開發者模式</h3>
+        <div class="dev-btn-grid">
+          <button id="devMobileVibrateBtn" class="ctrl-btn toggle" type="button">📳 震動回饋：開</button>
+          <button id="devMobileBigBtn" class="ctrl-btn toggle" type="button">🖐️ 單手大按鈕：關</button>
+          <button id="devMobileCompactBtn" class="ctrl-btn toggle" type="button">📐 緊湊盤面：關</button>
+        </div>
+      </div>
       <div class="dev-section">
         <h3>暗語清單（鍵盤輸入或點擊直接激活）</h3>
         <div id="devCodesList" class="dev-codes-list"></div>
       </div>
     </div>
   </aside>
+
+  <!-- 手機版專用密技輸入 Modal -->
+  <div id="mobileCodeModal" class="modal-backdrop" hidden>
+    <div class="modal-card mobile-code-card" role="dialog" aria-modal="true" aria-labelledby="mobileCodeTitle">
+      <div class="modal-header">
+        <h2 id="mobileCodeTitle">🔑 輸入密技（手機版專用）</h2>
+        <button id="closeMobileCodeBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
+      </div>
+      <p class="modal-note">請輸入暗語代碼（例如：SUPERHERO、TAIWAN、BLACK 等）</p>
+      <div class="mobile-code-form">
+        <input id="mobileCodeInput" class="mobile-code-input" type="text" placeholder="輸入密技代碼..." autocomplete="off" autocapitalize="characters" />
+        <button id="mobileCodeSubmitBtn" class="spin-btn mobile-code-submit" type="button">
+          <span class="spin-main">送出</span>
+        </button>
+      </div>
+      <p id="mobileCodeFeedback" class="mobile-code-feedback"></p>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
