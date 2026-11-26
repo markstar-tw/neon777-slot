@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.020"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.021"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -115,6 +115,7 @@
     devFastSpin: false,
     devGodMode: false,
     devBombShield: false,
+    devNoZeroEnd: false,
     devMobileVibrate: true,
     devMobileBigBtn: false,
     devMobileCompact: false,
@@ -224,6 +225,8 @@
   const devPanelModal = document.getElementById("devPanelModal");
   const closeDevPanelBtn = document.getElementById("closeDevPanelBtn");
   const devStatsBox = document.getElementById("devStatsBox");
+  const devCustomCreditsInput = document.getElementById("devCustomCreditsInput");
+  const devAddCustomBtn = document.getElementById("devAddCustomBtn");
   const devAdd10kBtn = document.getElementById("devAdd10kBtn");
   const devAdd100kBtn = document.getElementById("devAdd100kBtn");
   const devReset2kBtn = document.getElementById("devReset2kBtn");
@@ -233,6 +236,7 @@
   const devFastSpinBtn = document.getElementById("devFastSpinBtn");
   const devGodModeBtn = document.getElementById("devGodModeBtn");
   const devBombShieldBtn = document.getElementById("devBombShieldBtn");
+  const devNoZeroEndBtn = document.getElementById("devNoZeroEndBtn");
   const devClearPendingBtn = document.getElementById("devClearPendingBtn");
   const devCodesList = document.getElementById("devCodesList");
 
@@ -997,9 +1001,9 @@
       spinSubEl.textContent = "省 5% • SPACE";
     }
 
-    const minDualNeed = isDualAllIn ? 2 : isSingleAllInAny ? 1 : dualCost;
-    spinAllBtn.disabled = spinning || autoLocked || state.credits < minDualNeed || (!isSingleAllInAny && !isDualAllIn && rawDualSum <= 0);
-    burstSpinBtn.disabled = spinning || autoLocked || isSingleAllInAny || isDualAllIn || state.credits < burstCost || rawDualSum <= 0;
+    const minDualNeed = state.devNoZeroEnd ? 0 : (isDualAllIn ? 2 : isSingleAllInAny ? 1 : dualCost);
+    spinAllBtn.disabled = spinning || autoLocked || state.credits < minDualNeed || (!state.devNoZeroEnd && !isSingleAllInAny && !isDualAllIn && rawDualSum <= 0);
+    burstSpinBtn.disabled = spinning || autoLocked || isSingleAllInAny || isDualAllIn || (!state.devNoZeroEnd && (state.credits < burstCost || rawDualSum <= 0));
     betDownBtn.disabled = spinning || isMaxMode || isSingleAllInAny || isDualAllIn || machines.every((m) => m.bet <= 1);
     betUpBtn.disabled = spinning || isMaxMode || isSingleAllInAny || isDualAllIn || machines.every((m) => m.bet >= dynamicMax);
     maxBetBtn.disabled = spinning || isMaxMode || isSingleAllInAny || isDualAllIn || machines.every((m) => m.bet >= dynamicMax);
@@ -1036,7 +1040,7 @@
 
       const anyAllInMode = isSingleAllInAny || isDualAllIn;
       const singleBet = Math.min(m.bet, dynamicMax);
-      m.miniSpinBtn.disabled = anyAllInMode || disabledBySingleAllIn || m.isSpinning || m.autoSpin || state.autoSpin || state.autoSpinPendingDual || state.credits < singleBet || singleBet <= 0;
+      m.miniSpinBtn.disabled = anyAllInMode || disabledBySingleAllIn || m.isSpinning || m.autoSpin || state.autoSpin || state.autoSpinPendingDual || (!state.devNoZeroEnd && (state.credits < singleBet || singleBet <= 0));
       m.miniAllInBtn.disabled = anyAllInMode || isMaxMode || disabledBySingleAllIn || spinning || autoLocked || state.credits <= 0;
       m.miniAutoBtn.classList.toggle("active", m.autoSpin);
       m.miniAutoBtn.setAttribute("aria-pressed", String(m.autoSpin));
@@ -1147,6 +1151,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.021", desc: "開發者模式新增自訂任意金額、0元不結束開關；啟用後禁止結算且失敗不記錄成績。" },
     { ver: "v26.01.020", desc: "擴充開發人員面板即時狀態顯示；選單新增「更新資料表」。" },
     { ver: "v26.01.019", desc: "頁尾新增「無政治立場與選舉無關」聲明。" },
     { ver: "v26.01.018", desc: "調整國旗圖示等比例大小，與其他 Emoji 高度一致。" },
@@ -1212,6 +1217,8 @@
     devGodModeBtn.textContent = state.devGodMode ? "🛡️ 防黑八護盾：開" : "🛡️ 防黑八護盾：關";
     devBombShieldBtn.classList.toggle("active", state.devBombShield);
     devBombShieldBtn.textContent = state.devBombShield ? "🛡️ 炸彈護盾：開" : "🛡️ 炸彈護盾：關";
+    devNoZeroEndBtn.classList.toggle("active", state.devNoZeroEnd);
+    devNoZeroEndBtn.textContent = state.devNoZeroEnd ? "♾️ 0元不結束：開" : "♾️ 0元不結束：關";
     devMobileVibrateBtn.classList.toggle("active", state.devMobileVibrate);
     devMobileVibrateBtn.textContent = state.devMobileVibrate ? "📳 震動回饋：開" : "📳 震動回饋：關";
     devMobileBigBtn.classList.toggle("active", state.devMobileBigBtn);
@@ -1225,6 +1232,8 @@
   function unlockDevPanel() {
     state.devUnlocked = true;
     devPanelBtn.hidden = false;
+    menuSettleBtn.disabled = true;
+    menuSettleBtn.textContent = "🏁 結算（開發者模式鎖定）";
     closeMenu();
     renderDevCodesList();
     refreshDevPanel();
@@ -1280,10 +1289,17 @@
   }
 
   function checkGameOver(instantReason = null) {
-    if (!anySpinning() && (state.credits <= 0 || instantReason)) {
+    if (!anySpinning() && ((state.credits <= 0 && !state.devNoZeroEnd) || instantReason)) {
       stopAutoAndBurst();
       const baseText = instantReason || `本局共進行 ${state.spinCount} 輪轉動，餘額已歸零。`;
-      gameOverStats.innerHTML = `${baseText}<br>曾經賺過的最高餘額：<strong>${state.peakCredits.toLocaleString()}</strong> 點｜累計總贏分：<strong>${state.totalGrossWon.toLocaleString()}</strong> 點`;
+      if (state.devUnlocked) {
+        gameOverStats.innerHTML = `${baseText}<br>⚠️ <strong>開發者模式已啟用：本局成績不列入紀錄，且無法分享。</strong>`;
+      } else {
+        gameOverStats.innerHTML = `${baseText}<br>曾經賺過的最高餘額：<strong>${state.peakCredits.toLocaleString()}</strong> 點｜累計總贏分：<strong>${state.totalGrossWon.toLocaleString()}</strong> 點`;
+      }
+      gameOverShareXBtn.hidden = state.devUnlocked;
+      gameOverShareThreadsBtn.hidden = state.devUnlocked;
+      gameOverShareOtherBtn.hidden = state.devUnlocked;
       gameOverScreen.hidden = false;
       return true;
     }
@@ -1306,7 +1322,7 @@
   }
 
   function openSettlement(customTitle = "本局結算報告") {
-    if (anySpinning()) return;
+    if (anySpinning() || state.devUnlocked) return;
     stopAutoAndBurst();
     closeMenu();
     state.isSettled = true;
@@ -1420,7 +1436,12 @@
       ? rawTotal
       : getDiscountedSum(rawTotal, targetMachines.length, isBurst);
 
-    if (machineBets.some((b) => b <= 0) || state.credits < totalBet) {
+    if (state.devNoZeroEnd && state.credits < totalBet) {
+      totalBet = Math.max(0, state.credits);
+      machineBets.forEach((_, idx) => {
+        machineBets[idx] = totalBet > 0 ? Math.floor(totalBet / targetMachines.length) : 0;
+      });
+    } else if (machineBets.some((b) => b <= 0) || state.credits < totalBet) {
       if (state.isBurstSession) {
         state.credits = Math.max(0, state.credits + state.lastNetWin);
       }
@@ -1434,8 +1455,10 @@
     // 鎖定本局開轉前的炸彈權重，避免 ALL IN 扣款後餘額歸零導致沒吃到原本的炸彈%
     state.activeSpinBombWeight = getDynamicBombWeight();
     state.credits -= totalBet;
-    state.totalBetSpent += totalBet;
-    showSpendTag(totalBet);
+    if (!state.devUnlocked) {
+      state.totalBetSpent += totalBet;
+    }
+    if (totalBet > 0) showSpendTag(totalBet);
     if (!state.isBurstSession) {
       state.lastNetWin = 0;
     }
@@ -1571,12 +1594,14 @@
     const totalLines = validResults.reduce((sum, r) => sum + r.lineCount, 0);
     const maxWinCells = validResults.reduce((max, r) => Math.max(max, r.winCells.size), 0);
 
-    state.totalGrossWon += combinedNet;
-    state.maxSingleWin = Math.max(state.maxSingleWin, combinedNet);
-    state.jackpotHits += validResults.filter((r) => r.isJackpot && !r.isUltraJackpot).length;
-    state.ultraHits += validResults.filter((r) => r.isUltraJackpot).length;
-    state.mahjongHits += validResults.reduce((sum, r) => sum + r.mahjongCount, 0);
-    state.eightBallHits += validResults.reduce((sum, r) => sum + r.eightBallCount, 0);
+    if (!state.devUnlocked) {
+      state.totalGrossWon += combinedNet;
+      state.maxSingleWin = Math.max(state.maxSingleWin, combinedNet);
+      state.jackpotHits += validResults.filter((r) => r.isJackpot && !r.isUltraJackpot).length;
+      state.ultraHits += validResults.filter((r) => r.isUltraJackpot).length;
+      state.mahjongHits += validResults.reduce((sum, r) => sum + r.mahjongCount, 0);
+      state.eightBallHits += validResults.reduce((sum, r) => sum + r.eightBallCount, 0);
+    }
 
     if (anyUltraJackpot) {
       state.ultraJackpot = INITIAL_ULTRA_JACKPOT;
@@ -1586,7 +1611,9 @@
       state.lastNetWin += combinedNet;
     } else {
       state.credits = Math.max(0, state.credits + combinedNet);
-      state.peakCredits = Math.max(state.peakCredits, state.credits);
+      if (!state.devUnlocked) {
+        state.peakCredits = Math.max(state.peakCredits, state.credits);
+      }
       state.lastNetWin = combinedNet;
     }
 
@@ -2057,6 +2084,21 @@
 
   devBombShieldBtn.addEventListener("click", () => {
     state.devBombShield = !state.devBombShield;
+    updateUI();
+    refreshDevPanel();
+  });
+
+  devNoZeroEndBtn.addEventListener("click", () => {
+    state.devNoZeroEnd = !state.devNoZeroEnd;
+    updateUI();
+    refreshDevPanel();
+  });
+
+  devAddCustomBtn.addEventListener("click", () => {
+    const val = parseInt(devCustomCreditsInput.value, 10);
+    if (Number.isNaN(val)) return;
+    state.credits = Math.max(0, state.credits + val);
+    devCustomCreditsInput.value = "";
     updateUI();
     refreshDevPanel();
   });

@@ -173,6 +173,24 @@ body {
   gap: 8px;
 }
 
+.dev-custom-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dev-custom-input {
+  height: 36px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.menu-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .dev-codes-list {
   display: flex;
   flex-direction: column;
