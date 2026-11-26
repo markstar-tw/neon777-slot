@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.019"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.020"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -193,9 +193,14 @@
   const menuRestartBtn = document.getElementById("menuRestartBtn");
   const menuHomeBtn = document.getElementById("menuHomeBtn");
   const menuPaytableBtn = document.getElementById("menuPaytableBtn");
+  const menuChangelogBtn = document.getElementById("menuChangelogBtn");
   const menuSecretCodeBtn = document.getElementById("menuSecretCodeBtn");
   const mobileFullscreenBtn = document.getElementById("mobileFullscreenBtn");
   const devPanelBtn = document.getElementById("devPanelBtn");
+
+  const changelogModal = document.getElementById("changelogModal");
+  const closeChangelogBtn = document.getElementById("closeChangelogBtn");
+  const changelogList = document.getElementById("changelogList");
 
   const mobileCodeModal = document.getElementById("mobileCodeModal");
   const closeMobileCodeBtn = document.getElementById("closeMobileCodeBtn");
@@ -1141,6 +1146,33 @@
     `).join("");
   }
 
+  const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.020", desc: "擴充開發人員面板即時狀態顯示；選單新增「更新資料表」。" },
+    { ver: "v26.01.019", desc: "頁尾新增「無政治立場與選舉無關」聲明。" },
+    { ver: "v26.01.018", desc: "調整國旗圖示等比例大小，與其他 Emoji 高度一致。" },
+    { ver: "v26.01.017", desc: "全站 🇹🇼 改為使用 Flag_of_the_Republic_of_China.svg 相容顯示。" },
+    { ver: "v26.01.016", desc: "大幅降低自然開局同時出現 2 顆 🎱 黑八的機率。" },
+    { ver: "v26.01.015", desc: "機台名稱更新為「🎰 拉機 A」與「🎰 拉機 B」。" },
+    { ver: "v26.01.014", desc: "新增總餘額達 3,000,000,000,000,000 點直接傳說通關結束機制。" },
+    { ver: "v26.01.013", desc: "炸彈護盾升級為完全阻擋盤面出現任何 💣 炸彈。" },
+    { ver: "v26.01.012", desc: "調整最高炸彈出現率上限為 50%。" },
+    { ver: "v26.01.011", desc: "結算、失敗畫面與分享文案改為顯示「累計總贏分」。" },
+    { ver: "v26.01.010", desc: "修正分享至 Threads 時 Emoji 亂碼問題。" },
+    { ver: "v26.01.007", desc: "新增非賭博免責聲明、衛福部相關連結與 Google Antigravity 連結。" },
+    { ver: "v26.01.006", desc: "新增手機全螢幕按鈕與 PWA 標頭；隱藏手機密技提示。" },
+    { ver: "v26.01.004", desc: "新增手機橫向雙機並排專用排版。" },
+    { ver: "v26.01.001", desc: "導入 00.00.000 版本號系統。" }
+  ];
+
+  function renderChangelog() {
+    changelogList.innerHTML = CHANGELOG_ENTRIES.map((item) => `
+      <div class="changelog-item">
+        <span class="changelog-ver">${item.ver}</span>
+        <span class="changelog-desc">${formatTwFlags(item.desc)}</span>
+      </div>
+    `).join("");
+  }
+
   function refreshDevPanel() {
     if (!state.devUnlocked) return;
     const pendingList = [
@@ -1152,9 +1184,25 @@
       state.secretDoubleBlackPending && "🎱🎱 單台2黑八"
     ].filter(Boolean);
 
+    const netProfit = state.credits - INITIAL_CREDITS;
+    const netText = `${netProfit >= 0 ? "+" : ""}${netProfit.toLocaleString()}`;
+    const autoFlags = [
+      state.autoSpin && "雙機AUTO",
+      state.autoSpinPendingDual && "同步中",
+      machines[0].autoSpin && "A-AUTO",
+      machines[1].autoSpin && "B-AUTO",
+      state.burstRemaining > 0 && `連轉剩${state.burstRemaining}`
+    ].filter(Boolean);
+
     devStatsBox.innerHTML = formatTwFlags(`
-      餘額：<strong>${state.credits.toLocaleString()}</strong> ｜ 動態押注上限：<strong>${getDynamicMaxBet(machines.length)}</strong><br>
-      💣 炸彈權重：<strong>${getDynamicBombWeight()}</strong>（${getBombRatePercent()}%）<br>
+      版本：<strong>v${APP_VERSION}</strong> ｜ 模式：<strong>${state.betMode}</strong> ｜ 狀態：<strong>${state.isSettled ? "已結算" : anySpinning() ? "轉動中" : "待機"}</strong><br>
+      餘額：<strong>${state.credits.toLocaleString()}</strong>（最高 <strong>${state.peakCredits.toLocaleString()}</strong>）｜ 淨損益：<strong>${netText}</strong><br>
+      動態上限：<strong>${getDynamicMaxBet(machines.length)}</strong> ｜ 押注 A/B：<strong>${machines[0].bet} / ${machines[1].bet}</strong><br>
+      獎池 A/B：<strong>${machines[0].jackpot.toLocaleString()} / ${machines[1].jackpot.toLocaleString()}</strong> ｜ ULTRA：<strong>${state.ultraJackpot.toLocaleString()}</strong><br>
+      💣 炸彈權重：<strong>${getDynamicBombWeight()}</strong>（${getBombRatePercent()}% / 上限50%）<br>
+      累計總押：<strong>${state.totalBetSpent.toLocaleString()}</strong> ｜ 累計總贏：<strong>${state.totalGrossWon.toLocaleString()}</strong><br>
+      總轉數：<strong>${state.spinCount}</strong> ｜ GRAND/ULTRA：<strong>${state.jackpotHits}/${state.ultraHits}</strong> ｜ 🀄/🎱：<strong>${state.mahjongHits}/${state.eightBallHits}</strong><br>
+      自動/護盾：<strong>${autoFlags.length ? autoFlags.join("、") : "無"}</strong> ｜ 極速:${state.devFastSpin ? "開" : "關"} 防黑八:${state.devGodMode ? "開" : "關"} 炸彈盾:${state.devBombShield ? "開" : "關"}<br>
       下一轉強制項目：<strong>${pendingList.length ? pendingList.join("、") : "無"}</strong>
     `);
 
@@ -1877,6 +1925,20 @@
     paytableModal.hidden = false;
   });
 
+  menuChangelogBtn.addEventListener("click", () => {
+    closeMenu();
+    renderChangelog();
+    changelogModal.hidden = false;
+  });
+
+  closeChangelogBtn.addEventListener("click", () => {
+    changelogModal.hidden = true;
+  });
+
+  changelogModal.addEventListener("click", (e) => {
+    if (e.target === changelogModal) changelogModal.hidden = true;
+  });
+
   menuSecretCodeBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     closeMenu();
@@ -2091,12 +2153,14 @@
       !gameOverScreen.hidden ||
       !settlementScreen.hidden ||
       !mobileCodeModal.hidden ||
+      !changelogModal.hidden ||
       !paytableModal.hidden;
     if (e.code === "Space" && !anyOverlayOpen && !anyAutoActive() && !state.isSettled) {
       e.preventDefault();
       runSpin(machines);
     } else if (e.code === "Escape") {
       if (!paytableModal.hidden) paytableModal.hidden = true;
+      if (!changelogModal.hidden) changelogModal.hidden = true;
       if (!mobileCodeModal.hidden) mobileCodeModal.hidden = true;
       if (!devPanelModal.hidden) devPanelModal.hidden = true;
       if (!gameMenu.hidden) closeMenu();
