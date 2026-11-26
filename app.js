@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.005"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.006"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -188,6 +188,7 @@
   const menuHomeBtn = document.getElementById("menuHomeBtn");
   const menuPaytableBtn = document.getElementById("menuPaytableBtn");
   const menuSecretCodeBtn = document.getElementById("menuSecretCodeBtn");
+  const mobileFullscreenBtn = document.getElementById("mobileFullscreenBtn");
   const devPanelBtn = document.getElementById("devPanelBtn");
 
   const mobileCodeModal = document.getElementById("mobileCodeModal");
@@ -1990,6 +1991,34 @@
     state.soundEnabled = !state.soundEnabled;
     soundToggleBtn.textContent = state.soundEnabled ? "🔊 音效開" : "🔇 靜音";
   });
+
+  function updateFullscreenLabel() {
+    const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+    mobileFullscreenBtn.textContent = isFs ? "⛶ 退出全螢幕" : "⛶ 全螢幕";
+  }
+
+  mobileFullscreenBtn.addEventListener("click", async () => {
+    const docEl = document.documentElement;
+    const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+    try {
+      if (isFs) {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      } else if (docEl.requestFullscreen) {
+        await docEl.requestFullscreen();
+      } else if (docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+      } else {
+        window.alert("此瀏覽器不支援直接全螢幕，請使用「分享 → 加入主畫面」以全螢幕模式開啟。");
+      }
+    } catch (_) {
+      // ignore user/browser rejection
+    }
+    updateFullscreenLabel();
+  });
+
+  document.addEventListener("fullscreenchange", updateFullscreenLabel);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenLabel);
 
   closePaytableBtn.addEventListener("click", () => {
     paytableModal.hidden = true;
