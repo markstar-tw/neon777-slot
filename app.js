@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.009"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.010"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -1768,7 +1768,8 @@
 
   function shareToThreads() {
     const fullText = `${GAME_SHARE_URL}\n${buildShareBodyText()}`;
-    const threadsUrl = `https://www.threads.net/intent/post?text=${encodeURIComponent(fullText)}`;
+    // 直接使用 threads.com 避免 threads.net 跳轉時造成 UTF-8 Emoji 亂碼
+    const threadsUrl = `https://www.threads.com/intent/post?text=${encodeURIComponent(fullText)}`;
     window.open(threadsUrl, "_blank", "noopener,noreferrer");
   }
 
