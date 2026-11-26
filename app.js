@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.006"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.007"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -1755,7 +1755,8 @@
       headerTitle,
       `💰 最終餘額：${state.credits.toLocaleString()} 點（淨損益 ${netText} 點）`,
       `🏆 賺過最高金額：${state.peakCredits.toLocaleString()} 點｜單輪最高淨贏：${state.maxSingleWin.toLocaleString()} 點`,
-      `🎲 總轉數：${state.spinCount} 輪｜GRAND ${state.jackpotHits} 次 / ULTRA ${state.ultraHits} 次`
+      `🎲 總轉數：${state.spinCount} 輪｜GRAND ${state.jackpotHits} 次 / ULTRA ${state.ultraHits} 次`,
+      `✨ 快來加入我一起玩轉盤！`
     ].join("\n");
   }
 
