@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.016"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.017"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -25,7 +25,7 @@
   const INITIAL_ULTRA_JACKPOT = 25000;
   const MIN_BET = 5;
 
-  const TW_FLAG_HTML = `<svg class="tw-flag-svg" viewBox="0 0 36 24" aria-label="🇹🇼"><rect width="36" height="24" fill="#fe0000"/><rect width="18" height="12" fill="#000095"/><circle cx="9" cy="6" r="3.4" fill="#ffffff"/></svg>`;
+  const TW_FLAG_HTML = `<img class="tw-flag-svg" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" draggable="false" />`;
 
   function renderSymbolIcon(sym) {
     return sym.id === "tw" ? TW_FLAG_HTML : sym.icon;
