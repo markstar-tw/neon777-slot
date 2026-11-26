@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.011"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.012"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -35,8 +35,8 @@
     .filter((s) => s.id !== "bomb")
     .reduce((sum, s) => sum + s.weight, 0);
   const BASE_BOMB_RATE = BASE_BOMB_WEIGHT / (NON_BOMB_WEIGHT + BASE_BOMB_WEIGHT);
-  const MAX_BOMB_RATE = 0.75;
-  const BOMB_CAP_CREDITS = 2000000; // 需累積至 200 萬點以上才會觸及 75% 上限
+  const MAX_BOMB_RATE = 0.50;
+  const BOMB_CAP_CREDITS = 2000000; // 需累積至 200 萬點以上才會觸及 50% 上限
 
   function getDynamicBombWeight() {
     if (state.activeSpinBombWeight !== null) return state.activeSpinBombWeight;
