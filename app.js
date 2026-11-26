@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.021"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.022"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -225,6 +225,7 @@
   const devPanelModal = document.getElementById("devPanelModal");
   const closeDevPanelBtn = document.getElementById("closeDevPanelBtn");
   const devStatsBox = document.getElementById("devStatsBox");
+  const devRefreshStatsBtn = document.getElementById("devRefreshStatsBtn");
   const devCustomCreditsInput = document.getElementById("devCustomCreditsInput");
   const devAddCustomBtn = document.getElementById("devAddCustomBtn");
   const devAdd10kBtn = document.getElementById("devAdd10kBtn");
@@ -1151,6 +1152,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.022", desc: "開發人員面板狀態區新增「立即刷新狀態」按鈕。" },
     { ver: "v26.01.021", desc: "開發者模式新增自訂任意金額、0元不結束開關；啟用後禁止結算且失敗不記錄成績。" },
     { ver: "v26.01.020", desc: "擴充開發人員面板即時狀態顯示；選單新增「更新資料表」。" },
     { ver: "v26.01.019", desc: "頁尾新增「無政治立場與選舉無關」聲明。" },
@@ -2032,6 +2034,11 @@
 
   closeDevPanelBtn.addEventListener("click", () => {
     devPanelModal.hidden = true;
+  });
+
+  devRefreshStatsBtn.addEventListener("click", () => {
+    updateUI();
+    refreshDevPanel();
   });
 
   devAdd10kBtn.addEventListener("click", () => {
