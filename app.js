@@ -38,6 +38,7 @@
   const BOMB_CAP_CREDITS = 2000000; // 需累積至 200 萬點以上才會觸及 75% 上限
 
   function getDynamicBombWeight() {
+    if (state.activeSpinBombWeight !== null) return state.activeSpinBombWeight;
     if (state.credits <= INITIAL_CREDITS) return BASE_BOMB_WEIGHT;
     const excess = state.credits - INITIAL_CREDITS;
     const progress = Math.min(1, Math.pow(excess / BOMB_CAP_CREDITS, 0.8));
@@ -88,6 +89,7 @@
     mahjongHits: 0,
     eightBallHits: 0,
     isSettled: false,
+    activeSpinBombWeight: null,
     currentBet: 25,
     betMode: "normal", // "normal" | "max" | "single_allin" | "second_allin" | "dual_allin"
     lastNetWin: 0,
@@ -1341,6 +1343,8 @@
       return;
     }
 
+    // 鎖定本局開轉前的炸彈權重，避免 ALL IN 扣款後餘額歸零導致沒吃到原本的炸彈%
+    state.activeSpinBombWeight = getDynamicBombWeight();
     state.credits -= totalBet;
     state.totalBetSpent += totalBet;
     showSpendTag(totalBet);
@@ -1449,6 +1453,7 @@
     const results = await Promise.all(
       targetMachines.map((m, idx) => m.spinOne(machineBets[idx], idx * 160, preparedBoards[idx]))
     );
+    state.activeSpinBombWeight = null;
     stopSpinLoopSound();
 
     const validResults = results.filter(Boolean);
