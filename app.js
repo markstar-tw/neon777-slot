@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.015"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.016"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -15,7 +15,7 @@
     { id: "cherry",  icon: "🍒", name: "櫻桃",   weight: 12,    baseMult: 0.3 },
     { id: "lemon",   icon: "🍋", name: "檸檬",   weight: 14,    baseMult: 0.2 },
     { id: "bomb",      icon: "💣", name: "炸彈",     weight: 3.5,   baseMult: 1.0, isPenalty: true },
-    { id: "eightball", icon: "🎱", name: "黑八滅獎", weight: 0.045, baseMult: 0,   isVoid: true },
+    { id: "eightball", icon: "🎱", name: "黑八滅獎", weight: 0.025, baseMult: 0,   isVoid: true },
     { id: "mahjong",   icon: "🀄", name: "紅中",     weight: 0.025, baseMult: 0,   isSpecial: true },
     { id: "tw",        icon: "🇹🇼", name: "台灣之光", weight: 0.008, baseMult: 0,   isTopJackpot: true }
   ];
@@ -1414,6 +1414,23 @@
         Array.from({ length: GRID_COLS }, () => createRandomCol()),
         alreadyHasTwoTw ? 1 : 3
       );
+
+      // 額外降低自然開局同時出現 2 顆以上 🎱 的機率（85% 機率只保留第 1 顆 🎱）
+      if (!triggerDoubleBlack) {
+        let seenEight = 0;
+        const keepMultiEight = Math.random() < 0.15;
+        const lemonSym = SYMBOLS.find((s) => s.id === "lemon");
+        for (let c = 0; c < GRID_COLS; c++) {
+          for (let r = 0; r < GRID_ROWS; r++) {
+            if (board[c][r].id === "eightball") {
+              seenEight += 1;
+              if (seenEight > 1 && !keepMultiEight) {
+                board[c][r] = lemonSym;
+              }
+            }
+          }
+        }
+      }
 
       // 若輸入了秘密代碼 TAIWAN，下次賭時在第一台強制放入相連的 2 顆 🇹🇼
       if (triggerSecretTaiwan && idx === 0) {
