@@ -1,4 +1,5 @@
 (() => {
+  const APP_VERSION = "26.01.001"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -2036,6 +2037,10 @@
   });
 
   // 初始化
+  const appVersionEl = document.getElementById("appVersionText");
+  const startVersionEl = document.getElementById("startVersionText");
+  if (appVersionEl) appVersionEl.textContent = `v${APP_VERSION}`;
+  if (startVersionEl) startVersionEl.textContent = `v${APP_VERSION}`;
   renderPaytable();
   updateUI();
 })();
