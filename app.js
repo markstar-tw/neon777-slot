@@ -1710,7 +1710,7 @@
     menuBtn.setAttribute("aria-expanded", String(!nextHidden));
   });
 
-  const GAME_SHARE_URL = "https://www.google.com";
+  const GAME_SHARE_URL = "https://markstar-tw.github.io/neon777-slot/";
 
   function buildShareBodyText() {
     const netProfit = state.credits - INITIAL_CREDITS;
