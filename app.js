@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.012"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.013"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -39,6 +39,7 @@
   const BOMB_CAP_CREDITS = 2000000; // 需累積至 200 萬點以上才會觸及 50% 上限
 
   function getDynamicBombWeight() {
+    if (state.devBombShield) return 0;
     if (state.activeSpinBombWeight !== null) return state.activeSpinBombWeight;
     if (state.credits <= INITIAL_CREDITS) return BASE_BOMB_WEIGHT;
     const excess = state.credits - INITIAL_CREDITS;
@@ -1460,7 +1461,7 @@
         board[10][11] = eightSym;
       }
 
-      if (triggerNuke && idx === 0) {
+      if (triggerNuke && idx === 0 && !state.devBombShield) {
         const bombSym = SYMBOLS.find((s) => s.id === "bomb");
         const r = Math.floor(Math.random() * GRID_ROWS);
         for (let k = 0; k < 6; k++) {
@@ -1960,6 +1961,7 @@
 
   devBombShieldBtn.addEventListener("click", () => {
     state.devBombShield = !state.devBombShield;
+    updateUI();
     refreshDevPanel();
   });
 
