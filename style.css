@@ -781,17 +781,17 @@ body {
 }
 
 .tw-flag-img {
-  height: 1.05em;
+  height: 0.9em;
   width: auto;
-  vertical-align: -0.15em;
+  vertical-align: -0.1em;
   border-radius: 2px;
   display: inline-block;
-  box-shadow: 0 0 4px rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
 }
 
 .symbol-cell .tw-flag-img {
-  width: 18px;
-  height: 12px;
+  height: 0.95em;
+  width: auto;
   vertical-align: middle;
   display: block;
 }
@@ -1443,11 +1443,6 @@ body {
     font-size: 9.5px;
   }
 
-  .symbol-cell .tw-flag-img {
-    width: 11px;
-    height: 8px;
-  }
-
   .status-banner {
     padding: 5px 8px;
     font-size: 11px;
@@ -1639,11 +1634,6 @@ body {
 
   .symbol-cell {
     font-size: 8.5px;
-  }
-
-  .symbol-cell .tw-flag-img {
-    width: 10px;
-    height: 7px;
   }
 
   .status-banner {
