@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.014"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.015"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -899,8 +899,8 @@
   }
 
   const machines = [
-    createMachine("A", "🎰 🅰️", 8888, autoMachineABtn),
-    createMachine("B", "🎰 🅱️", 8888, autoMachineBBtn)
+    createMachine("A", "🎰 拉機 A", 8888, autoMachineABtn),
+    createMachine("B", "🎰 拉機 B", 8888, autoMachineBBtn)
   ];
 
   function anySpinning() {
@@ -957,12 +957,12 @@
     const autoLocked = anyAutoActive();
 
     const displayBetText = isSingleAllIn
-      ? `🅰️:${state.credits.toLocaleString()} / 🅱️:停用`
+      ? `A:${state.credits.toLocaleString()} / B:停用`
       : isSecondAllIn
-        ? `🅰️:停用 / 🅱️:${state.credits.toLocaleString()}`
+        ? `A:停用 / B:${state.credits.toLocaleString()}`
         : isDualAllIn
-          ? `🅰️:${Math.floor(state.credits / 2).toLocaleString()} / 🅱️:${Math.floor(state.credits / 2).toLocaleString()}`
-          : `🅰️:${machines[0].bet.toLocaleString()} / 🅱️:${machines[1].bet.toLocaleString()}`;
+          ? `A:${Math.floor(state.credits / 2).toLocaleString()} / B:${Math.floor(state.credits / 2).toLocaleString()}`
+          : `A:${machines[0].bet.toLocaleString()} / B:${machines[1].bet.toLocaleString()}`;
 
     creditsEl.textContent = state.credits.toLocaleString();
     bombRateLabelEl.textContent = `${getBombRatePercent()}%`;
@@ -1079,22 +1079,22 @@
   const SECRET_CODES = [
     {
       code: "TAIWAN",
-      desc: "下一轉 🅰️ 強制相連雙 🇹🇼（直奪 ULTRA）",
+      desc: "下一轉拉機 A 強制相連雙 🇹🇼（直奪 ULTRA）",
       run: () => { state.secretTaiwanPending = true; }
     },
     {
       code: "MAHJONG",
-      desc: "下一轉 🅰️ 必出 🀄 紅中大紅包",
+      desc: "下一轉拉機 A 必出 🀄 紅中大紅包",
       run: () => { state.secretMahjongPending = true; }
     },
     {
       code: "SEVENS",
-      desc: "下一轉 🅰️ 必出 5 連 7️⃣（中該台 GRAND）",
+      desc: "下一轉拉機 A 必出 5 連 7️⃣（中該台 GRAND）",
       run: () => { state.secretFiveSevensPending = true; }
     },
     {
       code: "NUKE",
-      desc: "下一轉 🅰️ 強制出現 💣 炸彈連線",
+      desc: "下一轉拉機 A 強制出現 💣 炸彈連線",
       run: () => { state.secretNukePending = true; }
     },
     {
@@ -1104,7 +1104,7 @@
     },
     {
       code: "DOUBLEBLACK",
-      desc: "下一轉 🅰️ 出現 2 顆 🎱（觸發即死）",
+      desc: "下一轉拉機 A 出現 2 顆 🎱（觸發即死）",
       run: () => { state.secretDoubleBlackPending = true; }
     },
     {
