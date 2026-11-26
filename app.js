@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.008"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.009"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -1228,7 +1228,7 @@
     if (!anySpinning() && (state.credits <= 0 || instantReason)) {
       stopAutoAndBurst();
       const baseText = instantReason || `本局共進行 ${state.spinCount} 輪轉動，餘額已歸零。`;
-      gameOverStats.innerHTML = `${baseText}<br>曾經賺過的最高餘額：<strong>${state.peakCredits.toLocaleString()}</strong> 點｜單輪最高淨贏：<strong>${state.maxSingleWin.toLocaleString()}</strong> 點`;
+      gameOverStats.innerHTML = `${baseText}<br>曾經賺過的最高餘額：<strong>${state.peakCredits.toLocaleString()}</strong> 點｜最後輪淨贏：<strong>${state.lastNetWin.toLocaleString()}</strong> 點`;
       gameOverScreen.hidden = false;
       return true;
     }
@@ -1242,7 +1242,7 @@
       { label: "最終餘額", value: `${state.credits.toLocaleString()} 點` },
       { label: "賺過最高金額", value: `${state.peakCredits.toLocaleString()} 點` },
       { label: "本局淨損益", value: netText },
-      { label: "單輪最高淨贏", value: `${state.maxSingleWin.toLocaleString()} 點` },
+      { label: "最後輪淨贏", value: `${state.lastNetWin.toLocaleString()} 點` },
       { label: "總轉動次數", value: `${state.spinCount.toLocaleString()} 輪` },
       { label: "累計總押注 / 總贏分", value: `${state.totalBetSpent.toLocaleString()} / ${state.totalGrossWon.toLocaleString()}` },
       { label: "GRAND / ULTRA 大獎", value: `${state.jackpotHits} 次 / ${state.ultraHits} 次` },
@@ -1754,7 +1754,7 @@
     return [
       headerTitle,
       `💰 最終餘額：${state.credits.toLocaleString()} 點（淨損益 ${netText} 點）`,
-      `🏆 賺過最高金額：${state.peakCredits.toLocaleString()} 點｜單輪最高淨贏：${state.maxSingleWin.toLocaleString()} 點`,
+      `🏆 賺過最高金額：${state.peakCredits.toLocaleString()} 點｜最後輪淨贏：${state.lastNetWin.toLocaleString()} 點`,
       `🎲 總轉數：${state.spinCount} 輪｜GRAND ${state.jackpotHits} 次 / ULTRA ${state.ultraHits} 次`,
       `✨ 快來加入我一起玩轉盤！`
     ].join("\n");
