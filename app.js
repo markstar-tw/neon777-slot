@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.02.002"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.02.003"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -21,7 +21,7 @@
     { id: "star",    icon: "⭐", name: "星星",   weight: 10, baseMult: 0.5 },
     { id: "cherry",  icon: "🍒", name: "櫻桃",   weight: 12,    baseMult: 0.3 },
     { id: "lemon",   icon: "🍋", name: "檸檬",   weight: 14,    baseMult: 0.2 },
-    { id: "bomb",      icon: "💣", name: "炸彈",     weight: 3.5,   baseMult: 1.0, isPenalty: true },
+    { id: "bomb",      icon: "💣", name: "炸彈",     weight: 1.2,   baseMult: 1.0, isPenalty: true },
     { id: "eightball", icon: "🎱", name: "黑八滅獎", weight: 0.025, baseMult: 0,   isVoid: true },
     { id: "mahjong",   icon: "🀄", name: "紅中",     weight: 0.025, baseMult: 0,   isSpecial: true },
     { id: "tw",        icon: "🇹🇼", name: "台灣之光", weight: 0.008, baseMult: 0,   isTopJackpot: true }
@@ -104,20 +104,22 @@
     return `<svg class="sym-svg sym-${sym.id}" viewBox="0 0 64 64" aria-hidden="true"><use href="#sym-${sym.id}"/></svg>`;
   }
 
-  const BASE_BOMB_WEIGHT = 3.5;
+  const BASE_BOMB_WEIGHT = 1.2;
   const NON_BOMB_WEIGHT = SYMBOLS
     .filter((s) => s.id !== "bomb")
     .reduce((sum, s) => sum + s.weight, 0);
   const BASE_BOMB_RATE = BASE_BOMB_WEIGHT / (NON_BOMB_WEIGHT + BASE_BOMB_WEIGHT);
   const MAX_BOMB_RATE = 0.50;
-  const BOMB_CAP_CREDITS = 2000000; // 需累積至 200 萬點以上才會觸及 50% 上限
+  const BOMB_CAP_CREDITS = 500000; // 累積至 50 萬點觸及 50% 上限，中期顯著爬升
 
   function getDynamicBombWeight() {
     if (state.devBombShield) return 0;
     if (state.activeSpinBombWeight !== null) return state.activeSpinBombWeight;
-    if (state.credits <= INITIAL_CREDITS) return BASE_BOMB_WEIGHT;
-    const excess = state.credits - INITIAL_CREDITS;
-    const progress = Math.min(1, Math.pow(excess / BOMB_CAP_CREDITS, 0.8));
+    const excess = Math.max(0, state.credits - INITIAL_CREDITS);
+    const creditProgress = excess > 0 ? Math.min(1, Math.pow(excess / BOMB_CAP_CREDITS, 0.55)) : 0;
+    const spinProgress = state.spinCount >= 8 ? Math.min(0.45, ((state.spinCount - 8) / 52) * 0.45) : 0;
+    const progress = Math.max(creditProgress, spinProgress);
+    if (progress <= 0) return BASE_BOMB_WEIGHT;
     const targetRate = BASE_BOMB_RATE + progress * (MAX_BOMB_RATE - BASE_BOMB_RATE);
     const weight = (targetRate * NON_BOMB_WEIGHT) / (1 - targetRate);
     return +weight.toFixed(2);
@@ -1449,6 +1451,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.02.003", time: "2026-11-27 23:07", desc: "調降初期炸彈出現率（約 2.1%），並強化遊戲中期的動態炸彈爬升節奏。" },
     { ver: "v26.02.002", time: "2026-11-27 23:05", desc: "修正手機直向模式押注模式按鈕超出畫面問題，改為緊湊自動換行完整顯示。" },
     { ver: "v26.02.001", time: "2026-11-27 23:02", desc: "手機直向模式將「連轉 ×5」、「雙機齊發」與模式選擇鎖定於螢幕底部，並保留底部滾動安全區，確保轉盤完整可視。" },
     { ver: "v26.02.000", time: "2026-11-27 22:17", desc: "大版本更新：支援 PWA 離線下載版 App、全站高清向量 SVG 視覺重繪、Xbox 搖桿相容模式、新手教學導覽與全球排行榜系統！" },
