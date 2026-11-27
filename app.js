@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.033"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.034"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -455,6 +455,7 @@
           }
           if (sym.id === "seven" && cappedRun >= 5) {
             acc.isJackpot = true;
+            acc.jackpotTriggers += 1;
           }
           if (!acc.bestCombo || amount > acc.bestCombo.amount) {
             acc.bestCombo = { sym, runLen: cappedRun, amount };
@@ -602,11 +603,12 @@
     return cols;
   }
 
-  function evaluateGrid(cols, bet, machineJackpot, chainCap = MAX_CHAIN_CAP) {
+  function evaluateGrid(cols, bet, machineJackpot, chainCap = MAX_CHAIN_CAP, machineInitialJackpot = 7770) {
     const acc = {
       grossWin: 0,
       penalty: 0,
       isJackpot: false,
+      jackpotTriggers: 0,
       isUltraJackpot: false,
       voidedByEightBall: false,
       leaveOneCredit: false,
@@ -678,7 +680,9 @@
     if (acc.twCount > 0) {
       acc.grossWin = Math.max(acc.grossWin, twPayout);
     } else if (acc.isJackpot) {
-      acc.grossWin = Math.max(acc.grossWin, machineJackpot);
+      const repeatCount = Math.max(0, acc.jackpotTriggers - 1);
+      const totalJackpotPayout = Math.min(Number.MAX_SAFE_INTEGER, machineJackpot + repeatCount * machineInitialJackpot);
+      acc.grossWin = Math.max(acc.grossWin, totalJackpotPayout);
     }
 
     // 炸彈只會扣除本局賺到的獎金，不會倒扣玩家持有的本金；若開啟炸彈護盾則免疫炸彈扣分
@@ -728,7 +732,9 @@
       if (acc.penalty > 0) label += `（💣 −${acc.penalty.toLocaleString()}）`;
       mode = "jackpot";
     } else if (acc.isJackpot) {
+      const repeatCount = Math.max(0, acc.jackpotTriggers - 1);
       label = `🎉 GRAND JACKPOT！${acc.bestCombo.runLen} 連 ${acc.bestCombo.sym.name}`;
+      if (repeatCount > 0) label += `（重複 ×${repeatCount} 各補初始 ${machineInitialJackpot.toLocaleString()}）`;
       if (acc.mahjongBonus > 0) label += `｜🀄 紅中送 ${acc.mahjongBonus.toLocaleString()}`;
       if (acc.penalty > 0) label += `（💣 −${acc.penalty.toLocaleString()}）`;
       mode = "jackpot";
@@ -917,7 +923,7 @@
 
         return Promise.all(animPromises).then(() => {
           machine.currentCols = nextCols;
-          const result = evaluateGrid(nextCols, bet, machine.jackpot, chainCap);
+          const result = evaluateGrid(nextCols, bet, machine.jackpot, chainCap, machine.initialJackpot);
           machine.renderStatic(result.winCells, result.bombCells, result.specialCells, result.voidCells);
 
           // 畫面色塊跳出與「答答答」連線音效完全同步觸發
@@ -934,6 +940,9 @@
           if (result.isJackpot) {
             machine.jackpot = machine.initialJackpot;
             machine.updateJackpotUI();
+          }
+          if (result.isUltraJackpot) {
+            state.ultraJackpot = INITIAL_ULTRA_JACKPOT;
           }
           machine.isSpinning = false;
           section.classList.remove("spinning-active");
@@ -1294,6 +1303,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.034", time: "2026-11-27 18:00", desc: "調整重複觸發 JACKPOT 規則：首個領取完整獎池，其餘重複次數給予初始獎池金額。" },
     { ver: "v26.01.033", time: "2026-11-27 17:30", desc: "完善結算與通關規範機制，並新增重開局選項。" },
     { ver: "v26.01.032", time: "2026-11-27 17:28", desc: "系統體驗最佳化與問題修正。" },
     { ver: "v26.01.031", time: "2026-11-27 17:18", desc: "新增神祕彩蛋機制與系統體驗最佳化。" },
