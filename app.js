@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.038"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.039"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -312,7 +312,6 @@
   const devGodModeBtn = document.getElementById("devGodModeBtn");
   const devBombShieldBtn = document.getElementById("devBombShieldBtn");
   const devNoZeroEndBtn = document.getElementById("devNoZeroEndBtn");
-  const devForceStarfallBtn = document.getElementById("devForceStarfallBtn");
   const devForceUnlimitBtn = document.getElementById("devForceUnlimitBtn");
   const devForceSplitBlackBtn = document.getElementById("devForceSplitBlackBtn");
   const devForceDoubleBlackBtn = document.getElementById("devForceDoubleBlackBtn");
@@ -1343,6 +1342,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.039", time: "2026-11-27 18:49", desc: "介面精簡與系統體驗最佳化。" },
     { ver: "v26.01.038", time: "2026-11-27 18:45", desc: "排行榜新增玩家隨機識別碼（#XXXX）與前 30 名自動清理機制最佳化。" },
     { ver: "v26.01.037", time: "2026-11-27 18:38", desc: "系統安全性強化與後端管理維護工具更新。" },
     { ver: "v26.01.036", time: "2026-11-27 18:27", desc: "選單新增「🏆 全球排行榜」，遊戲中可隨時查看 TOP 10。" },
@@ -2910,12 +2910,6 @@
     state.credits = Math.max(0, state.credits + val);
     devCustomCreditsInput.value = "";
     updateUI();
-    refreshDevPanel();
-  });
-
-  devForceStarfallBtn.addEventListener("click", () => {
-    markCheatActivated();
-    state.secretStarfallPending = true;
     refreshDevPanel();
   });
 
