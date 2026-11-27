@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.030"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.031"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -140,6 +140,8 @@
     secretNukePending: false,
     secretStarfallPending: false,
     secretUnlimitPending: false,
+    secretFullBoardSymbol: null,
+    secretLineSymbol: null,
     cheatUsed: false,
     devFastSpin: false,
     devGodMode: false,
@@ -272,6 +274,9 @@
   const devForceUnlimitBtn = document.getElementById("devForceUnlimitBtn");
   const devForceSplitBlackBtn = document.getElementById("devForceSplitBlackBtn");
   const devForceDoubleBlackBtn = document.getElementById("devForceDoubleBlackBtn");
+  const devFullSymbolSelect = document.getElementById("devFullSymbolSelect");
+  const devForceFullSymbolBtn = document.getElementById("devForceFullSymbolBtn");
+  const devForceLineSymbolBtn = document.getElementById("devForceLineSymbolBtn");
   const devClearPendingBtn = document.getElementById("devClearPendingBtn");
   const devCodesList = document.getElementById("devCodesList");
 
@@ -522,6 +527,29 @@
       }
     }
     return false;
+  }
+
+  const FULL_BOARD_ALLOWED_SYMBOLS = SYMBOLS.filter((s) => s.id !== "tw" && s.id !== "mahjong");
+  const SECRET_MIRACLE_CHANCE = 0.0008; // 0.08% 超級稀有秘密全盤同一符號（除 🇹🇼 與 🀄）
+
+  function pickSecretFullBoardSymbol(requestedId = "random") {
+    if (requestedId && requestedId !== "random") {
+      const exact = FULL_BOARD_ALLOWED_SYMBOLS.find((s) => s.id === requestedId);
+      if (exact) return exact;
+    }
+    const pool = FULL_BOARD_ALLOWED_SYMBOLS.map((s) => {
+      let w = s.weight;
+      if (s.id === "eightball") w = 0.05;
+      if (s.id === "bomb") w = 0.35;
+      return { sym: s, w };
+    });
+    const total = pool.reduce((sum, item) => sum + item.w, 0);
+    let roll = Math.random() * total;
+    for (const item of pool) {
+      roll -= item.w;
+      if (roll <= 0) return item.sym;
+    }
+    return pool[0].sym;
   }
 
   function placeSevenLine(cols, len) {
@@ -1264,6 +1292,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.031", time: "2026-11-27 17:18", desc: "新增神祕彩蛋機制與系統體驗最佳化。" },
     { ver: "v26.01.030", time: "2026-11-27 17:14", desc: "新增遊戲中期（滿 8 轉或 5,000 點以上）幸運 7 加成，提高 777 與 77777 連線出線機率。" },
     { ver: "v26.01.029", time: "2026-11-27 16:12", desc: "轉盤全面高清化：升級 11 種街機向量 SVG 符號、放大盤面尺寸並移除滾動模糊。" },
     { ver: "v26.01.028", time: "2026-11-27 15:42", desc: "調整 🎱 雙黑八規則：分開保留最後 1 元、相連直接遊戲結束。" },
@@ -1316,8 +1345,21 @@
 
   function refreshDevPanel() {
     if (!state.devUnlocked) return;
+    const fullBoardSym = state.secretFullBoardSymbol
+      ? (state.secretFullBoardSymbol === "random"
+        ? { icon: "🎲", name: "隨機(除🇹🇼/🀄)" }
+        : FULL_BOARD_ALLOWED_SYMBOLS.find((s) => s.id === state.secretFullBoardSymbol))
+      : null;
+    const lineSym = state.secretLineSymbol
+      ? (state.secretLineSymbol === "random"
+        ? { icon: "🎲", name: "隨機(除🇹🇼/🀄)" }
+        : FULL_BOARD_ALLOWED_SYMBOLS.find((s) => s.id === state.secretLineSymbol))
+      : null;
+
     const pendingList = [
       state.secretStarfallPending && "⭐ 強制全盤星星 (STARFALL)",
+      fullBoardSym && `🌌 強制全盤 (${fullBoardSym.icon} ${fullBoardSym.name})`,
+      lineSym && `🎯 強制5連 (${lineSym.icon} ${lineSym.name})`,
       state.secretUnlimitPending && "♾️ 單次連線無上限 (UNLIMIT)",
       state.secretTaiwanPending && "🇹🇼 雙國旗相連",
       state.secretMahjongPending && "🀄 必出紅中",
@@ -1632,6 +1674,8 @@
     const triggerFiveSevens = state.secretFiveSevensPending;
     const triggerNuke = state.secretNukePending;
     const triggerStarfall = state.secretStarfallPending;
+    const triggerFullBoardSymbol = state.secretFullBoardSymbol;
+    const triggerLineSymbol = state.secretLineSymbol;
     const activeChainCap = state.secretUnlimitPending ? GRID_COLS : MAX_CHAIN_CAP;
 
     state.secretTaiwanPending = false;
@@ -1643,12 +1687,40 @@
     state.secretNukePending = false;
     state.secretStarfallPending = false;
     state.secretUnlimitPending = false;
+    state.secretFullBoardSymbol = null;
+    state.secretLineSymbol = null;
+
+    const hasAnyForcedEvent =
+      triggerSecretTaiwan ||
+      triggerSecretBlack ||
+      triggerDoubleBlack ||
+      triggerSplitBlack ||
+      triggerMahjong ||
+      triggerFiveSevens ||
+      triggerNuke ||
+      triggerStarfall ||
+      Boolean(triggerFullBoardSymbol) ||
+      Boolean(triggerLineSymbol);
+
+    const naturalMiracleSym = !hasAnyForcedEvent && Math.random() < SECRET_MIRACLE_CHANCE
+      ? pickSecretFullBoardSymbol("random")
+      : null;
+    const naturalMiracleMachineIdx = naturalMiracleSym
+      ? Math.floor(Math.random() * targetMachines.length)
+      : -1;
 
     let alreadyHasTwoTw = false;
     const preparedBoards = targetMachines.map((_, idx) => {
       if (triggerStarfall) {
         const starSym = SYMBOLS.find((s) => s.id === "star");
         return Array.from({ length: GRID_COLS }, () => Array.from({ length: GRID_ROWS }, () => starSym));
+      }
+      if (triggerFullBoardSymbol) {
+        const chosenSym = pickSecretFullBoardSymbol(triggerFullBoardSymbol);
+        return Array.from({ length: GRID_COLS }, () => Array.from({ length: GRID_ROWS }, () => chosenSym));
+      }
+      if (naturalMiracleSym && idx === naturalMiracleMachineIdx) {
+        return Array.from({ length: GRID_COLS }, () => Array.from({ length: GRID_ROWS }, () => naturalMiracleSym));
       }
       const board = enforceExclusiveJackpot(
         Array.from({ length: GRID_COLS }, () => createRandomCol()),
@@ -1739,6 +1811,16 @@
         }
         board[2][2] = eightSym;
         board[12][12] = eightSym;
+      }
+
+      if (triggerLineSymbol && idx === 0) {
+        const chosenSym = pickSecretFullBoardSymbol(triggerLineSymbol);
+        if (chosenSym.id === "seven") replaceExtraTw(board, 0);
+        const r = Math.floor(Math.random() * GRID_ROWS);
+        const startC = Math.floor(Math.random() * (GRID_COLS - 5));
+        for (let k = 0; k < 5; k++) {
+          board[startC + k][r] = chosenSym;
+        }
       }
 
       if (triggerNuke && idx === 0 && !state.devBombShield) {
@@ -2341,6 +2423,18 @@
     refreshDevPanel();
   });
 
+  devForceFullSymbolBtn.addEventListener("click", () => {
+    markCheatActivated();
+    state.secretFullBoardSymbol = devFullSymbolSelect.value || "random";
+    refreshDevPanel();
+  });
+
+  devForceLineSymbolBtn.addEventListener("click", () => {
+    markCheatActivated();
+    state.secretLineSymbol = devFullSymbolSelect.value || "random";
+    refreshDevPanel();
+  });
+
   devClearPendingBtn.addEventListener("click", () => {
     state.secretTaiwanPending = false;
     state.secretBlackPending = false;
@@ -2351,6 +2445,8 @@
     state.secretNukePending = false;
     state.secretStarfallPending = false;
     state.secretUnlimitPending = false;
+    state.secretFullBoardSymbol = null;
+    state.secretLineSymbol = null;
     refreshDevPanel();
   });
 
