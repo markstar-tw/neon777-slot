@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.035"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.036"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -234,6 +234,7 @@
   const menuRestartBtn = document.getElementById("menuRestartBtn");
   const menuHomeBtn = document.getElementById("menuHomeBtn");
   const menuPaytableBtn = document.getElementById("menuPaytableBtn");
+  const menuLeaderboardBtn = document.getElementById("menuLeaderboardBtn");
   const menuChangelogBtn = document.getElementById("menuChangelogBtn");
   const menuSecretCodeBtn = document.getElementById("menuSecretCodeBtn");
   const mobileFullscreenBtn = document.getElementById("mobileFullscreenBtn");
@@ -267,6 +268,10 @@
   const startLeaderboardRefreshBtn = document.getElementById("startLeaderboardRefreshBtn");
   const settleLeaderboardList = document.getElementById("settleLeaderboardList");
   const settleLeaderboardRefreshBtn = document.getElementById("settleLeaderboardRefreshBtn");
+  const leaderboardModal = document.getElementById("leaderboardModal");
+  const closeLeaderboardModalBtn = document.getElementById("closeLeaderboardModalBtn");
+  const modalLeaderboardRefreshBtn = document.getElementById("modalLeaderboardRefreshBtn");
+  const modalLeaderboardList = document.getElementById("modalLeaderboardList");
   const leaderboardUploadBox = document.getElementById("leaderboardUploadBox");
   const leaderboardNameInput = document.getElementById("leaderboardNameInput");
   const leaderboardSubmitBtn = document.getElementById("leaderboardSubmitBtn");
@@ -1319,6 +1324,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.036", time: "2026-11-27 18:27", desc: "選單新增「🏆 全球排行榜」，遊戲中可隨時查看 TOP 10。" },
     { ver: "v26.01.035", time: "2026-11-27 18:20", desc: "新增 Supabase 全球排行榜 TOP 10 與結算成績上傳功能。" },
     { ver: "v26.01.034", time: "2026-11-27 18:00", desc: "調整重複觸發 JACKPOT 規則：首個領取完整獎池，其餘重複次數給予初始獎池金額。" },
     { ver: "v26.01.033", time: "2026-11-27 17:30", desc: "完善結算與通關規範機制，並新增重開局選項。" },
@@ -1572,6 +1578,7 @@
   function renderLeaderboardTargets(html) {
     if (startLeaderboardList) startLeaderboardList.innerHTML = html;
     if (settleLeaderboardList) settleLeaderboardList.innerHTML = html;
+    if (modalLeaderboardList) modalLeaderboardList.innerHTML = html;
   }
 
   async function fetchAndRenderLeaderboard() {
@@ -2425,6 +2432,26 @@
   if (settleLeaderboardRefreshBtn) {
     settleLeaderboardRefreshBtn.addEventListener("click", fetchAndRenderLeaderboard);
   }
+  if (menuLeaderboardBtn) {
+    menuLeaderboardBtn.addEventListener("click", () => {
+      closeMenu();
+      leaderboardModal.hidden = false;
+      fetchAndRenderLeaderboard();
+    });
+  }
+  if (closeLeaderboardModalBtn) {
+    closeLeaderboardModalBtn.addEventListener("click", () => {
+      leaderboardModal.hidden = true;
+    });
+  }
+  if (leaderboardModal) {
+    leaderboardModal.addEventListener("click", (e) => {
+      if (e.target === leaderboardModal) leaderboardModal.hidden = true;
+    });
+  }
+  if (modalLeaderboardRefreshBtn) {
+    modalLeaderboardRefreshBtn.addEventListener("click", fetchAndRenderLeaderboard);
+  }
 
   gameOverDisableDevRestartBtn.addEventListener("click", disableDevAndRestart);
   settleDisableDevRestartBtn.addEventListener("click", disableDevAndRestart);
@@ -2739,6 +2766,7 @@
       !settlementScreen.hidden ||
       !mobileCodeModal.hidden ||
       !changelogModal.hidden ||
+      !leaderboardModal.hidden ||
       !paytableModal.hidden;
     if (e.code === "Space" && !anyOverlayOpen && !anyAutoActive() && !state.isSettled) {
       e.preventDefault();
@@ -2746,6 +2774,7 @@
     } else if (e.code === "Escape") {
       if (!paytableModal.hidden) paytableModal.hidden = true;
       if (!changelogModal.hidden) changelogModal.hidden = true;
+      if (!leaderboardModal.hidden) leaderboardModal.hidden = true;
       if (!mobileCodeModal.hidden) mobileCodeModal.hidden = true;
       if (!devPanelModal.hidden) devPanelModal.hidden = true;
       if (!gameMenu.hidden) closeMenu();
