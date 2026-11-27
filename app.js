@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.037"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.038"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -239,6 +239,7 @@
   const menuPaytableBtn = document.getElementById("menuPaytableBtn");
   const menuLeaderboardBtn = document.getElementById("menuLeaderboardBtn");
   const menuChangelogBtn = document.getElementById("menuChangelogBtn");
+  const menuDisableDevRestartBtn = document.getElementById("menuDisableDevRestartBtn");
   const menuSecretCodeBtn = document.getElementById("menuSecretCodeBtn");
   const mobileFullscreenBtn = document.getElementById("mobileFullscreenBtn");
   const devPanelBtn = document.getElementById("devPanelBtn");
@@ -1342,6 +1343,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.038", time: "2026-11-27 18:45", desc: "排行榜新增玩家隨機識別碼（#XXXX）與前 30 名自動清理機制最佳化。" },
     { ver: "v26.01.037", time: "2026-11-27 18:38", desc: "系統安全性強化與後端管理維護工具更新。" },
     { ver: "v26.01.036", time: "2026-11-27 18:27", desc: "選單新增「🏆 全球排行榜」，遊戲中可隨時查看 TOP 10。" },
     { ver: "v26.01.035", time: "2026-11-27 18:20", desc: "新增 Supabase 全球排行榜 TOP 10 與結算成績上傳功能。" },
@@ -1469,6 +1471,7 @@
   function unlockDevPanel() {
     state.devUnlocked = true;
     devPanelBtn.hidden = false;
+    if (menuDisableDevRestartBtn) menuDisableDevRestartBtn.hidden = false;
     menuSettleBtn.disabled = true;
     menuSettleBtn.textContent = "🏁 結算（開發者模式鎖定）";
     closeMenu();
@@ -1548,6 +1551,7 @@
     state.adminSessionPass = null;
     if (adminModal) adminModal.hidden = true;
     devPanelBtn.hidden = true;
+    if (menuDisableDevRestartBtn) menuDisableDevRestartBtn.hidden = true;
     devPanelModal.hidden = true;
     restartGame({ showStart: false });
   }
@@ -1642,6 +1646,16 @@
     }
   }
 
+  function formatTaggedPlayerName(rawName) {
+    const cleanBase = String(rawName || "").trim().slice(0, 15);
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let suffix = "";
+    for (let i = 0; i < 4; i++) {
+      suffix += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return `${cleanBase}#${suffix}`;
+  }
+
   async function submitLeaderboardScore() {
     if (isTestModeActive()) {
       leaderboardSubmitFeedback.textContent = "⚠️ 測試／開發者模式下無法上傳至全球排行榜。";
@@ -1662,13 +1676,14 @@
       leaderboardNameInput.focus();
       return;
     }
-    if (trimmedName.length > 20) {
-      leaderboardSubmitFeedback.textContent = "⚠️ 玩家暱稱請限制在 20 字以內。";
+    if (trimmedName.length > 15) {
+      leaderboardSubmitFeedback.textContent = "⚠️ 玩家暱稱請限制在 15 字以內（系統會自動加上 #XXXX）。";
       leaderboardSubmitFeedback.className = "leaderboard-feedback error";
       leaderboardNameInput.focus();
       return;
     }
 
+    const taggedName = formatTaggedPlayerName(trimmedName);
     const scoreToUpload = Math.max(0, Math.floor(state.credits));
     state.isUploadingLeaderboard = true;
     leaderboardSubmitBtn.disabled = true;
@@ -1679,14 +1694,14 @@
     try {
       const { error } = await supabaseClient
         .from("leaderboard")
-        .insert([{ player_name: trimmedName, score: scoreToUpload }]);
+        .insert([{ player_name: taggedName, score: scoreToUpload }]);
 
       if (error) throw error;
 
       state.hasUploadedCurrentSettlement = true;
       leaderboardSubmitBtn.textContent = "✅ 已上傳";
       leaderboardNameInput.disabled = true;
-      leaderboardSubmitFeedback.textContent = `✅ 已成功上傳 ${trimmedName}（${scoreToUpload.toLocaleString()} 點）至全球排行榜！`;
+      leaderboardSubmitFeedback.textContent = `✅ 已成功上傳 ${taggedName}（${scoreToUpload.toLocaleString()} 點）！`;
       leaderboardSubmitFeedback.className = "leaderboard-feedback success";
       await fetchAndRenderLeaderboard();
     } catch (err) {
@@ -2634,8 +2649,9 @@
   if (adminAddRowBtn) {
     adminAddRowBtn.addEventListener("click", async () => {
       if (!state.devUnlocked || !state.adminSessionPass || !supabaseClient) return;
-      const name = (window.prompt("請輸入玩家暱稱（最多 20 字）：") || "").trim();
-      if (!name || name.length > 20) return;
+      const rawName = (window.prompt("請輸入玩家暱稱（最多 15 字，系統自動加 #XXXX）：") || "").trim();
+      if (!rawName || rawName.length > 15) return;
+      const name = formatTaggedPlayerName(rawName);
       const scoreRaw = window.prompt("請輸入分數（大於等於 0 的整數）：");
       if (scoreRaw === null) return;
       const score = Math.floor(Number(scoreRaw));
@@ -2724,6 +2740,10 @@
   menuRestartBtn.addEventListener("click", () => {
     restartGame({ showStart: false });
   });
+
+  if (menuDisableDevRestartBtn) {
+    menuDisableDevRestartBtn.addEventListener("click", disableDevAndRestart);
+  }
 
   menuHomeBtn.addEventListener("click", () => {
     if (anySpinning()) return;
