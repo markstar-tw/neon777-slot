@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.025"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.026"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -112,6 +112,9 @@
     secretMahjongPending: false,
     secretFiveSevensPending: false,
     secretNukePending: false,
+    secretStarfallPending: false,
+    secretUnlimitPending: false,
+    cheatUsed: false,
     devFastSpin: false,
     devGodMode: false,
     devBombShield: false,
@@ -218,8 +221,8 @@
   const settleTitle = document.getElementById("settleTitle");
   const settleStatsGrid = document.getElementById("settleStatsGrid");
   const downloadSettleImgBtn = document.getElementById("downloadSettleImgBtn");
-  const shareXBtn = document.getElementById("shareXBtn");
-  const shareThreadsBtn = document.getElementById("shareThreadsBtn");
+  const settleShareXBtn = document.getElementById("shareXBtn");
+  const settleShareThreadsBtn = document.getElementById("shareThreadsBtn");
   const shareSettleBtn = document.getElementById("shareSettleBtn");
   const settleRestartBtn = document.getElementById("settleRestartBtn");
 
@@ -239,6 +242,8 @@
   const devGodModeBtn = document.getElementById("devGodModeBtn");
   const devBombShieldBtn = document.getElementById("devBombShieldBtn");
   const devNoZeroEndBtn = document.getElementById("devNoZeroEndBtn");
+  const devForceStarfallBtn = document.getElementById("devForceStarfallBtn");
+  const devForceUnlimitBtn = document.getElementById("devForceUnlimitBtn");
   const devClearPendingBtn = document.getElementById("devClearPendingBtn");
   const devCodesList = document.getElementById("devCodesList");
 
@@ -295,7 +300,8 @@
 
   function getConnectStepMs(cellCount) {
     if (cellCount <= 1) return CONNECT_STEP_MS;
-    return Math.min(CONNECT_STEP_MS, Math.max(12, Math.floor(CONNECT_MAX_DELAY_MS / cellCount)));
+    if (cellCount >= 200) return 10;
+    return Math.min(CONNECT_STEP_MS, Math.max(10, Math.floor(CONNECT_MAX_DELAY_MS / cellCount)));
   }
 
   function playConnectDaDaDaSound(cellCount) {
@@ -306,6 +312,12 @@
       const delaySec = (i * stepMs) / 1000;
       const freq = 640 + Math.min(i, 18) * 22;
       playTone(freq, 0.038, "triangle", 0.065, delaySec);
+    }
+    // 全盤 256 格滿盤連線時額外合併高音階和弦音效
+    if (cellCount >= 200) {
+      [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((chordFreq, idx) => {
+        playTone(chordFreq, 0.45, "triangle", 0.06, 0.08 + idx * 0.03);
+      });
     }
   }
 
@@ -359,7 +371,7 @@
   }
 
   // 沿著單一方向 (dc, dr) 掃描連續 3 顆以上的符號
-  function scanLine(cols, startC, startR, dc, dr, bet, acc) {
+  function scanLine(cols, startC, startR, dc, dr, bet, acc, chainCap = MAX_CHAIN_CAP) {
     let c = startC;
     let r = startR;
 
@@ -380,13 +392,17 @@
       }
 
       if (runLen >= 3) {
-        const cappedRun = Math.min(runLen, MAX_CHAIN_CAP);
+        const cappedRun = Math.min(runLen, chainCap);
         const mult = sym.baseMult * Math.pow(2, cappedRun - 3);
-        const amount = Math.max(1, Math.round(bet * mult));
+        const rawAmount = Math.round(bet * mult);
+        const amount = Math.min(
+          Number.MAX_SAFE_INTEGER,
+          Math.max(1, Number.isFinite(rawAmount) ? rawAmount : Number.MAX_SAFE_INTEGER)
+        );
 
         if (sym.isPenalty) {
           acc.bombCount += 1;
-          acc.penalty += amount;
+          acc.penalty = Math.min(Number.MAX_SAFE_INTEGER, acc.penalty + amount);
           for (let k = 0; k < runLen; k++) {
             const key = `${c + dc * k}-${r + dr * k}`;
             if (!acc.bombCells.has(key)) {
@@ -395,7 +411,7 @@
           }
         } else {
           acc.lineCount += 1;
-          acc.grossWin += amount;
+          acc.grossWin = Math.min(Number.MAX_SAFE_INTEGER, acc.grossWin + amount);
           for (let k = 0; k < runLen; k++) {
             const key = `${c + dc * k}-${r + dr * k}`;
             if (!acc.winCells.has(key)) {
@@ -494,7 +510,7 @@
     return cols;
   }
 
-  function evaluateGrid(cols, bet, machineJackpot) {
+  function evaluateGrid(cols, bet, machineJackpot, chainCap = MAX_CHAIN_CAP) {
     const acc = {
       grossWin: 0,
       penalty: 0,
@@ -545,12 +561,12 @@
     }
     acc.grossWin += acc.mahjongBonus;
 
-    for (let r = 0; r < GRID_ROWS; r++) scanLine(cols, 0, r, 1, 0, bet, acc);
-    for (let c = 0; c < GRID_COLS; c++) scanLine(cols, c, 0, 0, 1, bet, acc);
-    for (let c = 0; c < GRID_COLS; c++) scanLine(cols, c, 0, 1, 1, bet, acc);
-    for (let r = 1; r < GRID_ROWS; r++) scanLine(cols, 0, r, 1, 1, bet, acc);
-    for (let c = 0; c < GRID_COLS; c++) scanLine(cols, c, 0, -1, 1, bet, acc);
-    for (let r = 1; r < GRID_ROWS; r++) scanLine(cols, GRID_COLS - 1, r, -1, 1, bet, acc);
+    for (let r = 0; r < GRID_ROWS; r++) scanLine(cols, 0, r, 1, 0, bet, acc, chainCap);
+    for (let c = 0; c < GRID_COLS; c++) scanLine(cols, c, 0, 0, 1, bet, acc, chainCap);
+    for (let c = 0; c < GRID_COLS; c++) scanLine(cols, c, 0, 1, 1, bet, acc, chainCap);
+    for (let r = 1; r < GRID_ROWS; r++) scanLine(cols, 0, r, 1, 1, bet, acc, chainCap);
+    for (let c = 0; c < GRID_COLS; c++) scanLine(cols, c, 0, -1, 1, bet, acc, chainCap);
+    for (let r = 1; r < GRID_ROWS; r++) scanLine(cols, GRID_COLS - 1, r, -1, 1, bet, acc, chainCap);
 
     // 計算 🇹🇼 獎金：
     // 1 顆 = GRAND；2 顆分開 = GRAND + 10%；2 顆相連 = ULTRA GRAND；3 顆以上（不論是否相連）再加 GRAND 的 50%
@@ -747,7 +763,7 @@
         });
       },
 
-      spinOne(bet, staggerOffsetMs = 0, prebuiltCols = null) {
+      spinOne(bet, staggerOffsetMs = 0, prebuiltCols = null, chainCap = MAX_CHAIN_CAP) {
         if (machine.isSpinning) return Promise.resolve(null);
 
         machine.isSpinning = true;
@@ -801,7 +817,7 @@
 
         return Promise.all(animPromises).then(() => {
           machine.currentCols = nextCols;
-          const result = evaluateGrid(nextCols, bet, machine.jackpot);
+          const result = evaluateGrid(nextCols, bet, machine.jackpot, chainCap);
           machine.renderStatic(result.winCells, result.bombCells, result.specialCells, result.voidCells);
 
           // 畫面色塊跳出與「答答答」連線音效完全同步觸發
@@ -1133,12 +1149,32 @@
       run: () => { state.credits = 1; updateUI(); }
     },
     {
+      code: "STARFALL",
+      desc: "下一轉運作機台強制全盤 ⭐ 星星",
+      run: () => { state.secretStarfallPending = true; }
+    },
+    {
+      code: "UNLIMIT",
+      desc: "下一轉解除 8 連上限，最高算至 16 連",
+      run: () => { state.secretUnlimitPending = true; }
+    },
+    {
       code: "SUPERHERO",
       desc: "解鎖並開啟開發人員面板",
       hideActivate: true,
       run: () => { unlockDevPanel(); }
     }
   ];
+
+  function isTestModeActive() {
+    return state.devUnlocked || state.cheatUsed;
+  }
+
+  function markCheatActivated() {
+    state.cheatUsed = true;
+    menuSettleBtn.disabled = true;
+    menuSettleBtn.textContent = state.devUnlocked ? "🏁 結算（開發者模式鎖定）" : "🏁 結算（已鎖定）";
+  }
 
   function renderDevCodesList() {
     devCodesList.innerHTML = SECRET_CODES.map((item) => `
@@ -1153,6 +1189,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.026", time: "2026-11-27 15:13", desc: "Bug 修復（Bug Fixes / 提升系統穩定性）。" },
     { ver: "v26.01.025", time: "2026-11-27 03:23", desc: "Bug 修復（Bug Fixes / 提升系統穩定性）。" },
     { ver: "v26.01.024", time: "2026-11-27 03:22", desc: "改名為「更新日誌」並加入日期時間；開始畫面下方新增最新更新。" },
     { ver: "v26.01.023", time: "2026-11-27 03:19", desc: "Bug 修復（Bug Fixes / 提升系統穩定性）。" },
@@ -1201,6 +1238,8 @@
   function refreshDevPanel() {
     if (!state.devUnlocked) return;
     const pendingList = [
+      state.secretStarfallPending && "⭐ 強制全盤星星 (STARFALL)",
+      state.secretUnlimitPending && "♾️ 單次連線無上限 (UNLIMIT)",
       state.secretTaiwanPending && "🇹🇼 雙國旗相連",
       state.secretMahjongPending && "🀄 必出紅中",
       state.secretFiveSevensPending && "7️⃣ 5連7",
@@ -1286,6 +1325,9 @@
     state.mahjongHits = 0;
     state.eightBallHits = 0;
     state.isSettled = false;
+    state.cheatUsed = state.devUnlocked;
+    menuSettleBtn.disabled = state.devUnlocked;
+    menuSettleBtn.textContent = state.devUnlocked ? "🏁 結算（開發者模式鎖定）" : "🏁 結算並結束本局";
     state.currentBet = 25;
     state.lastNetWin = 0;
     state.ultraJackpot = INITIAL_ULTRA_JACKPOT;
@@ -1312,14 +1354,15 @@
     if (!anySpinning() && ((state.credits <= 0 && !state.devNoZeroEnd) || instantReason)) {
       stopAutoAndBurst();
       const baseText = instantReason || `本局共進行 ${state.spinCount} 輪轉動，餘額已歸零。`;
-      if (state.devUnlocked) {
-        gameOverStats.innerHTML = `${baseText}<br>⚠️ <strong>開發者模式已啟用：本局成績不列入紀錄，且無法分享。</strong>`;
+      const blockedRecord = isTestModeActive();
+      if (blockedRecord) {
+        gameOverStats.innerHTML = `${baseText}<br>⚠️ <strong>測試／開發者模式已啟用：本局成績不列入紀錄，且無法分享。</strong>`;
       } else {
         gameOverStats.innerHTML = `${baseText}<br>曾經賺過的最高餘額：<strong>${state.peakCredits.toLocaleString()}</strong> 點｜累計總贏分：<strong>${state.totalGrossWon.toLocaleString()}</strong> 點`;
       }
-      gameOverShareXBtn.hidden = state.devUnlocked;
-      gameOverShareThreadsBtn.hidden = state.devUnlocked;
-      gameOverShareOtherBtn.hidden = state.devUnlocked;
+      gameOverShareXBtn.hidden = blockedRecord;
+      gameOverShareThreadsBtn.hidden = blockedRecord;
+      gameOverShareOtherBtn.hidden = blockedRecord;
       gameOverScreen.hidden = false;
       return true;
     }
@@ -1341,8 +1384,9 @@
     ];
   }
 
-  function openSettlement(customTitle = "本局結算報告") {
-    if (anySpinning() || state.devUnlocked) return;
+  function openSettlement(customTitle = "本局結算報告", { allowOnMaxWin = false } = {}) {
+    if (anySpinning()) return;
+    if (isTestModeActive() && !allowOnMaxWin) return;
     stopAutoAndBurst();
     closeMenu();
     state.isSettled = true;
@@ -1354,13 +1398,17 @@
         <span class="settle-stat-val">${r.value}</span>
       </div>
     `).join("");
+    const hideShare = isTestModeActive();
+    settleShareXBtn.hidden = hideShare;
+    settleShareThreadsBtn.hidden = hideShare;
+    shareSettleBtn.hidden = hideShare;
     settlementScreen.hidden = false;
     updateUI();
   }
 
   function checkMaxWinEnding() {
     if (!anySpinning() && state.credits >= MAX_WIN_CREDITS) {
-      openSettlement("🏆 達成 3,000,000,000,000,000 傳說通關！");
+      openSettlement("🏆 達成 3,000,000,000,000,000 傳說通關！", { allowOnMaxWin: true });
       return true;
     }
     return false;
@@ -1475,8 +1523,8 @@
     // 鎖定本局開轉前的炸彈權重，避免 ALL IN 扣款後餘額歸零導致沒吃到原本的炸彈%
     state.activeSpinBombWeight = getDynamicBombWeight();
     state.credits -= totalBet;
-    if (!state.devUnlocked) {
-      state.totalBetSpent += totalBet;
+    if (!isTestModeActive()) {
+      state.totalBetSpent = Math.min(Number.MAX_SAFE_INTEGER, state.totalBetSpent + totalBet);
     }
     if (totalBet > 0) showSpendTag(totalBet);
     if (!state.isBurstSession) {
@@ -1484,7 +1532,7 @@
     }
     state.spinCount += 1;
     // 任意一台開賭時都會累積全場共用的超終極大獎獎池
-    state.ultraJackpot += Math.max(10, Math.round(totalBet * 0.3));
+    state.ultraJackpot = Math.min(Number.MAX_SAFE_INTEGER, state.ultraJackpot + Math.max(10, Math.round(totalBet * 0.3)));
 
     startSpinLoopSound();
     updateUI();
@@ -1496,15 +1544,24 @@
     const triggerMahjong = state.secretMahjongPending;
     const triggerFiveSevens = state.secretFiveSevensPending;
     const triggerNuke = state.secretNukePending;
+    const triggerStarfall = state.secretStarfallPending;
+    const activeChainCap = state.secretUnlimitPending ? GRID_COLS : MAX_CHAIN_CAP;
+
     state.secretTaiwanPending = false;
     state.secretBlackPending = false;
     state.secretDoubleBlackPending = false;
     state.secretMahjongPending = false;
     state.secretFiveSevensPending = false;
     state.secretNukePending = false;
+    state.secretStarfallPending = false;
+    state.secretUnlimitPending = false;
 
     let alreadyHasTwoTw = false;
     const preparedBoards = targetMachines.map((_, idx) => {
+      if (triggerStarfall) {
+        const starSym = SYMBOLS.find((s) => s.id === "star");
+        return Array.from({ length: GRID_COLS }, () => Array.from({ length: GRID_ROWS }, () => starSym));
+      }
       const board = enforceExclusiveJackpot(
         Array.from({ length: GRID_COLS }, () => createRandomCol()),
         alreadyHasTwoTw ? 1 : 3
@@ -1599,13 +1656,16 @@
     });
 
     const results = await Promise.all(
-      targetMachines.map((m, idx) => m.spinOne(machineBets[idx], idx * 160, preparedBoards[idx]))
+      targetMachines.map((m, idx) => m.spinOne(machineBets[idx], idx * 160, preparedBoards[idx], activeChainCap))
     );
     state.activeSpinBombWeight = null;
     stopSpinLoopSound();
 
     const validResults = results.filter(Boolean);
-    const combinedNet = validResults.reduce((sum, r) => sum + r.netResult, 0);
+    const combinedNet = Math.min(
+      Number.MAX_SAFE_INTEGER,
+      validResults.reduce((sum, r) => sum + r.netResult, 0)
+    );
     const anyUltraJackpot = validResults.some((r) => r.isUltraJackpot);
     const anyJackpot = validResults.some((r) => r.isJackpot);
     const anyMahjong = validResults.some((r) => r.mahjongCount > 0);
@@ -1614,9 +1674,9 @@
     const totalLines = validResults.reduce((sum, r) => sum + r.lineCount, 0);
     const maxWinCells = validResults.reduce((max, r) => Math.max(max, r.winCells.size), 0);
 
-    if (!state.devUnlocked) {
-      state.totalGrossWon += combinedNet;
-      state.maxSingleWin = Math.max(state.maxSingleWin, combinedNet);
+    if (!isTestModeActive()) {
+      state.totalGrossWon = Math.min(Number.MAX_SAFE_INTEGER, state.totalGrossWon + combinedNet);
+      state.maxSingleWin = Math.min(Number.MAX_SAFE_INTEGER, Math.max(state.maxSingleWin, combinedNet));
       state.jackpotHits += validResults.filter((r) => r.isJackpot && !r.isUltraJackpot).length;
       state.ultraHits += validResults.filter((r) => r.isUltraJackpot).length;
       state.mahjongHits += validResults.reduce((sum, r) => sum + r.mahjongCount, 0);
@@ -1628,10 +1688,10 @@
     }
 
     if (state.isBurstSession) {
-      state.lastNetWin += combinedNet;
+      state.lastNetWin = Math.min(Number.MAX_SAFE_INTEGER, state.lastNetWin + combinedNet);
     } else {
-      state.credits = Math.max(0, state.credits + combinedNet);
-      if (!state.devUnlocked) {
+      state.credits = Math.min(Number.MAX_SAFE_INTEGER, Math.max(0, state.credits + combinedNet));
+      if (!isTestModeActive()) {
         state.peakCredits = Math.max(state.peakCredits, state.credits);
       }
       state.lastNetWin = combinedNet;
@@ -1659,9 +1719,11 @@
 
     // 連轉 ×5 跑完五次後才徹底結算入總餘額，並保留 NET 顯示直到下次再賭才重製
     if (state.isBurstSession && state.burstRemaining === 0) {
-      state.credits = Math.max(0, state.credits + state.lastNetWin);
-      state.peakCredits = Math.max(state.peakCredits, state.credits);
-      state.maxSingleWin = Math.max(state.maxSingleWin, state.lastNetWin);
+      state.credits = Math.min(Number.MAX_SAFE_INTEGER, Math.max(0, state.credits + state.lastNetWin));
+      if (!isTestModeActive()) {
+        state.peakCredits = Math.max(state.peakCredits, state.credits);
+        state.maxSingleWin = Math.max(state.maxSingleWin, state.lastNetWin);
+      }
       state.isBurstSession = false;
       machines.forEach((m) => {
         m.setStatus(
@@ -1941,9 +2003,9 @@
 
   downloadSettleImgBtn.addEventListener("click", downloadSettlementImage);
 
-  shareXBtn.addEventListener("click", shareToX);
+  settleShareXBtn.addEventListener("click", shareToX);
 
-  shareThreadsBtn.addEventListener("click", shareToThreads);
+  settleShareThreadsBtn.addEventListener("click", shareToThreads);
 
   shareSettleBtn.addEventListener("click", () => shareSettlementToSocial(shareSettleBtn));
 
@@ -2008,6 +2070,7 @@
     if (!code) return;
     const matched = SECRET_CODES.find((item) => item.code === code);
     if (matched) {
+      markCheatActivated();
       matched.run();
       refreshDevPanel();
       mobileCodeInput.value = "";
@@ -2128,6 +2191,18 @@
     refreshDevPanel();
   });
 
+  devForceStarfallBtn.addEventListener("click", () => {
+    markCheatActivated();
+    state.secretStarfallPending = true;
+    refreshDevPanel();
+  });
+
+  devForceUnlimitBtn.addEventListener("click", () => {
+    markCheatActivated();
+    state.secretUnlimitPending = true;
+    refreshDevPanel();
+  });
+
   devClearPendingBtn.addEventListener("click", () => {
     state.secretTaiwanPending = false;
     state.secretBlackPending = false;
@@ -2135,6 +2210,8 @@
     state.secretMahjongPending = false;
     state.secretFiveSevensPending = false;
     state.secretNukePending = false;
+    state.secretStarfallPending = false;
+    state.secretUnlimitPending = false;
     refreshDevPanel();
   });
 
@@ -2143,6 +2220,7 @@
     if (!btn) return;
     const entry = SECRET_CODES.find((c) => c.code === btn.dataset.code);
     if (entry) {
+      markCheatActivated();
       entry.run();
       refreshDevPanel();
     }
@@ -2209,6 +2287,7 @@
       secretKeyBuffer = (secretKeyBuffer + e.key.toUpperCase()).slice(-12);
       const matched = SECRET_CODES.find((item) => secretKeyBuffer.endsWith(item.code));
       if (matched) {
+        markCheatActivated();
         matched.run();
         secretKeyBuffer = "";
         refreshDevPanel();
