@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.027"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.028"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -109,6 +109,7 @@
     secretTaiwanPending: false,
     secretBlackPending: false,
     secretDoubleBlackPending: false,
+    secretSplitBlackPending: false,
     secretMahjongPending: false,
     secretFiveSevensPending: false,
     secretNukePending: false,
@@ -244,6 +245,8 @@
   const devNoZeroEndBtn = document.getElementById("devNoZeroEndBtn");
   const devForceStarfallBtn = document.getElementById("devForceStarfallBtn");
   const devForceUnlimitBtn = document.getElementById("devForceUnlimitBtn");
+  const devForceSplitBlackBtn = document.getElementById("devForceSplitBlackBtn");
+  const devForceDoubleBlackBtn = document.getElementById("devForceDoubleBlackBtn");
   const devClearPendingBtn = document.getElementById("devClearPendingBtn");
   const devCodesList = document.getElementById("devCodesList");
 
@@ -517,6 +520,7 @@
       isJackpot: false,
       isUltraJackpot: false,
       voidedByEightBall: false,
+      leaveOneCredit: false,
       instantGameOver: false,
       eightBallCount: 0,
       twCount: 0,
@@ -533,14 +537,16 @@
       voidCells: new Set()
     };
 
-    // 先檢查盤面上是否出現 🎱（失去本台該局所有獎金，但不會影響獎池與餘額）、🇹🇼 與 🀄
+    // 先檢查盤面上是否出現 🎱（1 顆歸零、2 顆分開留 1 元、2 顆相連即死）、🇹🇼 與 🀄
     const bonusPerMahjong = Math.max(1000, getDynamicMaxBet(machines.length));
     const twPositions = [];
+    const eightPositions = [];
     for (let c = 0; c < GRID_COLS; c++) {
       for (let r = 0; r < GRID_ROWS; r++) {
         const cellSym = cols[c][r];
         if (cellSym.id === "eightball") {
           acc.eightBallCount += 1;
+          eightPositions.push([c, r]);
           acc.voidCells.add(`${c}-${r}`);
         } else if (cellSym.id === "mahjong") {
           acc.mahjongCount += 1;
@@ -593,7 +599,9 @@
     let netResult = Math.max(0, acc.grossWin - acc.penalty);
     if (acc.eightBallCount > 0 && !state.devGodMode) {
       acc.voidedByEightBall = true;
-      acc.instantGameOver = acc.eightBallCount >= 2;
+      const eightAdjacent = acc.eightBallCount >= 2 && hasAdjacentTwPair(eightPositions);
+      acc.instantGameOver = eightAdjacent;
+      acc.leaveOneCredit = acc.eightBallCount >= 2 && !eightAdjacent;
       acc.isJackpot = false;
       acc.isUltraJackpot = false;
       acc.winCells.clear();
@@ -605,7 +613,10 @@
     let mode = "normal";
 
     if (acc.instantGameOver) {
-      label = `🎱🎱 雙黑八降臨（${acc.eightBallCount} 顆）！直接判定遊戲結束！`;
+      label = `🎱🎱 雙黑八相連！直接判定遊戲結束！`;
+      mode = "penalty";
+    } else if (acc.leaveOneCredit) {
+      label = `🎱 雙黑八分開降臨！餘額僅留最後 1 元！`;
       mode = "penalty";
     } else if (acc.voidedByEightBall) {
       label = `🎱 黑八降臨 ×${acc.eightBallCount}！失去本局所有獎金（獎池與餘額保留）`;
@@ -1135,8 +1146,13 @@
     },
     {
       code: "DOUBLEBLACK",
-      desc: "下一轉拉機 A 出現 2 顆 🎱（觸發即死）",
+      desc: "下一轉拉機 A 出現相連 2 顆 🎱（觸發即死）",
       run: () => { state.secretDoubleBlackPending = true; }
+    },
+    {
+      code: "SPLITBLACK",
+      desc: "下一轉拉機 A 出現分開 2 顆 🎱（留下最後 1 元）",
+      run: () => { state.secretSplitBlackPending = true; }
     },
     {
       code: "MONEY",
@@ -1189,6 +1205,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.028", time: "2026-11-27 15:42", desc: "調整 🎱 雙黑八規則：分開保留最後 1 元、相連直接遊戲結束。" },
     { ver: "v26.01.027", time: "2026-11-27 15:35", desc: "優化更新日誌分類與系統體驗調校。" },
     { ver: "v26.01.026", time: "2026-11-27 15:13", desc: "新增神祕彩蛋機制與極限數值安全防護。" },
     { ver: "v26.01.025", time: "2026-11-27 03:23", desc: "Bug 修復（系統穩定性與效能調校）。" },
@@ -1246,7 +1263,8 @@
       state.secretFiveSevensPending && "7️⃣ 5連7",
       state.secretNukePending && "💣 炸彈連線",
       state.secretBlackPending && "🎱 雙機各1黑八",
-      state.secretDoubleBlackPending && "🎱🎱 單台2黑八"
+      state.secretDoubleBlackPending && "🎱🎱 雙黑八相連",
+      state.secretSplitBlackPending && "🎱 雙黑八分開(留1元)"
     ].filter(Boolean);
 
     const netProfit = state.credits - INITIAL_CREDITS;
@@ -1542,6 +1560,7 @@
     const triggerSecretTaiwan = state.secretTaiwanPending;
     const triggerSecretBlack = state.secretBlackPending;
     const triggerDoubleBlack = state.secretDoubleBlackPending;
+    const triggerSplitBlack = state.secretSplitBlackPending;
     const triggerMahjong = state.secretMahjongPending;
     const triggerFiveSevens = state.secretFiveSevensPending;
     const triggerNuke = state.secretNukePending;
@@ -1551,6 +1570,7 @@
     state.secretTaiwanPending = false;
     state.secretBlackPending = false;
     state.secretDoubleBlackPending = false;
+    state.secretSplitBlackPending = false;
     state.secretMahjongPending = false;
     state.secretFiveSevensPending = false;
     state.secretNukePending = false;
@@ -1569,7 +1589,7 @@
       );
 
       // 額外降低自然開局同時出現 2 顆以上 🎱 的機率（85% 機率只保留第 1 顆 🎱）
-      if (!triggerDoubleBlack) {
+      if (!triggerDoubleBlack && !triggerSplitBlack) {
         let seenEight = 0;
         const keepMultiEight = Math.random() < 0.15;
         const lemonSym = SYMBOLS.find((s) => s.id === "lemon");
@@ -1638,8 +1658,20 @@
 
       if (triggerDoubleBlack && idx === 0) {
         const eightSym = SYMBOLS.find((s) => s.id === "eightball");
-        board[2][3] = eightSym;
-        board[10][11] = eightSym;
+        board[5][6] = eightSym;
+        board[6][6] = eightSym;
+      }
+
+      if (triggerSplitBlack && idx === 0) {
+        const eightSym = SYMBOLS.find((s) => s.id === "eightball");
+        const lemonSym = SYMBOLS.find((s) => s.id === "lemon");
+        for (let c = 0; c < GRID_COLS; c++) {
+          for (let r = 0; r < GRID_ROWS; r++) {
+            if (board[c][r].id === "eightball") board[c][r] = lemonSym;
+          }
+        }
+        board[2][2] = eightSym;
+        board[12][12] = eightSym;
       }
 
       if (triggerNuke && idx === 0 && !state.devBombShield) {
@@ -1671,6 +1703,7 @@
     const anyJackpot = validResults.some((r) => r.isJackpot);
     const anyMahjong = validResults.some((r) => r.mahjongCount > 0);
     const anyBomb = validResults.some((r) => r.bombCount > 0);
+    const anyLeaveOne = validResults.some((r) => r.leaveOneCredit);
     const anyInstantGameOver = validResults.some((r) => r.instantGameOver);
     const totalLines = validResults.reduce((sum, r) => sum + r.lineCount, 0);
     const maxWinCells = validResults.reduce((max, r) => Math.max(max, r.winCells.size), 0);
@@ -1696,6 +1729,10 @@
         state.peakCredits = Math.max(state.peakCredits, state.credits);
       }
       state.lastNetWin = combinedNet;
+    }
+
+    if (anyLeaveOne && !anyInstantGameOver) {
+      state.credits = 1;
     }
 
     if (maxWinCells > 0 && state.devMobileVibrate && navigator.vibrate) {
@@ -1737,7 +1774,7 @@
     updateUI();
 
     if (anyInstantGameOver) {
-      checkGameOver(`本局共進行 ${state.spinCount} 輪，因單台同時出現 2 顆 🎱 黑八直接判定遊戲結束！`);
+      checkGameOver(`本局共進行 ${state.spinCount} 輪，因單台同時出現相連 2 顆 🎱 黑八直接判定遊戲結束！`);
       return;
     }
 
@@ -1792,7 +1829,7 @@
       const multText = s.isTopJackpot
         ? `1顆 GRAND / 2顆分開 GRAND+10% / 2顆相連 ULTRA / 3顆再+GRAND 50%`
         : s.isVoid
-          ? `1顆失去該台獎金（獎池與餘額保留）；單台出現 2 顆直接遊戲結束`
+          ? `1顆失去該台獎金；2顆分開留最後1元；2顆相連直接遊戲結束`
           : s.isSpecial
             ? `極稀有！出現即送 max(1,000, 當前押注上限)`
             : s.isPenalty
@@ -2204,10 +2241,23 @@
     refreshDevPanel();
   });
 
+  devForceSplitBlackBtn.addEventListener("click", () => {
+    markCheatActivated();
+    state.secretSplitBlackPending = true;
+    refreshDevPanel();
+  });
+
+  devForceDoubleBlackBtn.addEventListener("click", () => {
+    markCheatActivated();
+    state.secretDoubleBlackPending = true;
+    refreshDevPanel();
+  });
+
   devClearPendingBtn.addEventListener("click", () => {
     state.secretTaiwanPending = false;
     state.secretBlackPending = false;
     state.secretDoubleBlackPending = false;
+    state.secretSplitBlackPending = false;
     state.secretMahjongPending = false;
     state.secretFiveSevensPending = false;
     state.secretNukePending = false;

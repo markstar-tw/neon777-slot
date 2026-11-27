@@ -22,7 +22,7 @@
   <meta name="twitter:description" content="雙機 16×16 超大盤面、全方向連線兌獎、動態炸彈風險與三層獎池！來挑戰你的最高戰績！" />
   <meta name="twitter:image" content="https://markstar-tw.github.io/neon777-slot/main_logo.jpg" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>" />
-  <link rel="stylesheet" href="style.css?v=26.01.027" />
+  <link rel="stylesheet" href="style.css?v=26.01.028" />
 </head>
 <body>
   <div class="app-shell">
@@ -141,7 +141,7 @@
 
     <footer class="site-footer">
       <p class="footer-brand">
-        <span id="appVersionText">v26.01.027</span> ｜
+        <span id="appVersionText">v26.01.028</span> ｜
         Made with <a href="https://antigravity.google/" target="_blank" rel="noopener noreferrer">Google Antigravity</a> ｜
         Hosted on <a href="https://github.com/markstar-tw/neon777-slot" target="_blank" rel="noopener noreferrer">GitHub</a>
       </p>
@@ -162,7 +162,7 @@
   <!-- 開始畫面 Overlay -->
   <div id="startScreen" class="overlay-screen">
     <div class="overlay-card start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
-      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.027</span></span>
+      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.028</span></span>
       <h2 id="startTitle" class="overlay-title">街霸拉機NEON777</h2>
       <p class="overlay-desc">雙機 16×16 街機拉霸！橫、直、左右斜線皆可兌獎（最高 8 連），各台獨立累積 GRAND JACKPOT，尋找極稀有 <img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /> 與 🀄！</p>
       <ul class="overlay-rules">
@@ -229,7 +229,7 @@
         <h2 id="paytableTitle">賠率表 PAYTABLE</h2>
         <button id="closePaytableBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
       </div>
-      <p class="modal-note">每台皆為 16×16 盤面，<strong>橫列、直行、左右斜線</strong>出現連續 3 顆以上相同符號即可兌獎（最高 8 連）；出現 3 連以上 💣 炸彈會扣獎金（不扣本金）；出現 1 顆 <strong>🎱 黑八</strong> 失去該台獎金（獎池與餘額保留），若單台同時出現 <strong>2 顆以上 🎱</strong> 則直接判定遊戲結束；稀有 <strong>🀄 紅中</strong> 依當前押注上限送大紅包（最低 1,000）；<strong><img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /></strong> 1 顆中該台 GRAND、2 顆分開中 GRAND+10%、2 顆相連直奪 <strong>ULTRA GRAND JACKPOT</strong>，3 顆再加送 GRAND 的 50%！</p>
+      <p class="modal-note">每台皆為 16×16 盤面，<strong>橫列、直行、左右斜線</strong>出現連續 3 顆以上相同符號即可兌獎（最高 8 連）；出現 3 連以上 💣 炸彈會扣獎金（不扣本金）；出現 1 顆 <strong>🎱 黑八</strong> 失去該台獎金（獎池與餘額保留），出現 2 顆 <strong>🎱 分開</strong> 留下最後 1 元，若 <strong>2 顆 🎱 相連</strong> 則直接遊戲失敗；稀有 <strong>🀄 紅中</strong> 依當前押注上限送大紅包（最低 1,000）；<strong><img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /></strong> 1 顆中該台 GRAND、2 顆分開中 GRAND+10%、2 顆相連直奪 <strong>ULTRA GRAND JACKPOT</strong>，3 顆再加送 GRAND 的 50%！</p>
       <div id="paytableBody" class="paytable-grid"></div>
     </div>
   </div>
@@ -264,6 +264,8 @@
           <button id="devNoZeroEndBtn" class="ctrl-btn toggle" type="button">♾️ 0元不結束：關</button>
           <button id="devForceStarfallBtn" class="ctrl-btn" type="button">⭐ 強制全盤星星</button>
           <button id="devForceUnlimitBtn" class="ctrl-btn" type="button">♾️ 單次連線無上限</button>
+          <button id="devForceSplitBlackBtn" class="ctrl-btn" type="button">🎱 雙黑八分開（留1元）</button>
+          <button id="devForceDoubleBlackBtn" class="ctrl-btn" type="button">🎱🎱 雙黑八相連（即死）</button>
           <button id="devClearPendingBtn" class="ctrl-btn" type="button">🧹 清除待命強制項目</button>
         </div>
       </div>
@@ -312,6 +314,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=26.01.027"></script>
+  <script src="app.js?v=26.01.028"></script>
 </body>
 </html>
