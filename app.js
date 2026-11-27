@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.047"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.048"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -1373,6 +1373,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.048", time: "2026-11-27 19:43", desc: "將設定與選項彈窗圖示（含手機震動開關）全面升級為大型高清向量 SVG。" },
     { ver: "v26.01.047", time: "2026-11-27 19:36", desc: "將右上角選單圖示全面升級為高清放大向量 SVG 圖示。" },
     { ver: "v26.01.046", time: "2026-11-27 19:31", desc: "優化新手教學模式：點選後直接進入遊戲無需再按開始，並自動偵測 Xbox 搖桿與手機模式顯示專屬操作導覽。" },
     { ver: "v26.01.045", time: "2026-11-27 19:28", desc: "新增 5 步驟互動式「📖 新手教學模式」，可於開始畫面與右上角選單隨時開啟。" },
@@ -3059,22 +3060,31 @@
     }
   });
 
+  function setSettingBtnLabel(btn, text) {
+    if (!btn) return;
+    const labelEl = btn.querySelector(".setting-btn-label");
+    if (labelEl) labelEl.textContent = text;
+    else btn.textContent = text;
+  }
+
   function syncSettingsUI() {
     if (settingSoundBtn) {
       settingSoundBtn.classList.toggle("active", state.soundEnabled);
-      settingSoundBtn.textContent = state.soundEnabled ? "🔊 遊戲音效：開" : "🔇 遊戲音效：靜音";
+      setSettingBtnLabel(settingSoundBtn, state.soundEnabled ? "遊戲音效：開" : "遊戲音效：靜音");
+      const soundUse = document.getElementById("settingSoundIconUse");
+      if (soundUse) soundUse.setAttribute("href", state.soundEnabled ? "#ico-sound-on" : "#ico-sound-off");
     }
     if (settingMobileVibrateBtn) {
       settingMobileVibrateBtn.classList.toggle("active", state.devMobileVibrate);
-      settingMobileVibrateBtn.textContent = state.devMobileVibrate ? "📳 手機震動：開" : "📳 手機震動：關";
+      setSettingBtnLabel(settingMobileVibrateBtn, state.devMobileVibrate ? "手機震動：開" : "手機震動：關");
     }
     if (settingGamepadRumbleBtn) {
       settingGamepadRumbleBtn.classList.toggle("active", state.gamepadRumbleEnabled);
-      settingGamepadRumbleBtn.textContent = state.gamepadRumbleEnabled ? "🎮 手把震動：開" : "🎮 手把震動：關";
+      setSettingBtnLabel(settingGamepadRumbleBtn, state.gamepadRumbleEnabled ? "手把震動：開" : "手把震動：關");
     }
     if (settingGamepadInputBtn) {
       settingGamepadInputBtn.classList.toggle("active", state.gamepadEnabled);
-      settingGamepadInputBtn.textContent = state.gamepadEnabled ? "🕹️ 搖桿控制：開" : "🕹️ 搖桿控制：關";
+      setSettingBtnLabel(settingGamepadInputBtn, state.gamepadEnabled ? "搖桿控制：開" : "搖桿控制：關");
     }
   }
 
