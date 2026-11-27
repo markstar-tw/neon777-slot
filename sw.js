@@ -1,4 +1,4 @@
-const CACHE_NAME = "neon777-v26.02.000";
+const CACHE_NAME = "neon777-v26.02.001";
 const CORE_ASSETS = [
   "./",
   "./index.html",

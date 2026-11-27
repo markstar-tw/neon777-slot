@@ -752,6 +752,10 @@ body {
   gap: 10px;
 }
 
+.mobile-sticky-dock {
+  display: contents;
+}
+
 .bet-controls,
 .spin-controls,
 .bet-mode-switch,
@@ -2215,6 +2219,54 @@ body {
 
   body.mobile-compact-grid .symbol-cell {
     font-size: 9px;
+  }
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+  body {
+    padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-sticky-dock {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 48;
+    background: rgba(13, 17, 32, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(45, 226, 230, 0.42);
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.78);
+  }
+
+  .mobile-sticky-dock .mode-auto-bar {
+    padding-top: 2px;
+    gap: 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .mobile-sticky-dock .bet-mode-switch,
+  .mobile-sticky-dock .auto-cluster {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    white-space: nowrap;
+    padding-bottom: 1px;
+  }
+
+  .mobile-sticky-dock .bet-mode-switch::-webkit-scrollbar,
+  .mobile-sticky-dock .auto-cluster::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-sticky-dock .mode-btn,
+  .mobile-sticky-dock .auto-unit-btn {
+    flex-shrink: 0;
   }
 }
 
