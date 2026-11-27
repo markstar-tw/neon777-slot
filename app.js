@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.02.001"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.02.002"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -1449,6 +1449,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.02.002", time: "2026-11-27 23:05", desc: "修正手機直向模式押注模式按鈕超出畫面問題，改為緊湊自動換行完整顯示。" },
     { ver: "v26.02.001", time: "2026-11-27 23:02", desc: "手機直向模式將「連轉 ×5」、「雙機齊發」與模式選擇鎖定於螢幕底部，並保留底部滾動安全區，確保轉盤完整可視。" },
     { ver: "v26.02.000", time: "2026-11-27 22:17", desc: "大版本更新：支援 PWA 離線下載版 App、全站高清向量 SVG 視覺重繪、Xbox 搖桿相容模式、新手教學導覽與全球排行榜系統！" },
     { ver: "v26.01.051", time: "2026-11-27 19:58", desc: "為機台 GRAND JACKPOT 徽章加入滑鼠懸停與手機點擊說明提示卡。" },
