@@ -1,5 +1,11 @@
 (() => {
-  const APP_VERSION = "26.01.034"; // 格式：年.大版本.小版本 (00.00.000)
+  const SUPABASE_URL = "https://vdctxgvfjfzojjdmhaqy.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_YSr6kFrajDqmoOHBDUt_Og_7QVrKHZE";
+  const supabaseClient = window.supabase
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+    : null;
+
+  const APP_VERSION = "26.01.035"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -151,7 +157,9 @@
     devMobileBigBtn: false,
     devMobileCompact: false,
     devUnlocked: false,
-    soundEnabled: true
+    soundEnabled: true,
+    isUploadingLeaderboard: false,
+    hasUploadedCurrentSettlement: false
   };
 
   // 動態押注限制演算法：依目前總餘額與啟用機台數動態計算可壓上限（每台最多壓單台可用額度的 25%）
@@ -255,6 +263,14 @@
   const shareSettleBtn = document.getElementById("shareSettleBtn");
   const settleDisableDevRestartBtn = document.getElementById("settleDisableDevRestartBtn");
   const settleRestartBtn = document.getElementById("settleRestartBtn");
+  const startLeaderboardList = document.getElementById("startLeaderboardList");
+  const startLeaderboardRefreshBtn = document.getElementById("startLeaderboardRefreshBtn");
+  const settleLeaderboardList = document.getElementById("settleLeaderboardList");
+  const settleLeaderboardRefreshBtn = document.getElementById("settleLeaderboardRefreshBtn");
+  const leaderboardUploadBox = document.getElementById("leaderboardUploadBox");
+  const leaderboardNameInput = document.getElementById("leaderboardNameInput");
+  const leaderboardSubmitBtn = document.getElementById("leaderboardSubmitBtn");
+  const leaderboardSubmitFeedback = document.getElementById("leaderboardSubmitFeedback");
 
   const devPanelModal = document.getElementById("devPanelModal");
   const closeDevPanelBtn = document.getElementById("closeDevPanelBtn");
@@ -1303,6 +1319,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.035", time: "2026-11-27 18:20", desc: "新增 Supabase 全球排行榜 TOP 10 與結算成績上傳功能。" },
     { ver: "v26.01.034", time: "2026-11-27 18:00", desc: "調整重複觸發 JACKPOT 規則：首個領取完整獎池，其餘重複次數給予初始獎池金額。" },
     { ver: "v26.01.033", time: "2026-11-27 17:30", desc: "完善結算與通關規範機制，並新增重開局選項。" },
     { ver: "v26.01.032", time: "2026-11-27 17:28", desc: "系統體驗最佳化與問題修正。" },
@@ -1543,6 +1560,118 @@
     ];
   }
 
+  function escapeHtml(text) {
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function renderLeaderboardTargets(html) {
+    if (startLeaderboardList) startLeaderboardList.innerHTML = html;
+    if (settleLeaderboardList) settleLeaderboardList.innerHTML = html;
+  }
+
+  async function fetchAndRenderLeaderboard() {
+    if (!supabaseClient) {
+      renderLeaderboardTargets(`<div class="leaderboard-empty">⚠️ 尚未連線至排行榜服務</div>`);
+      return;
+    }
+    renderLeaderboardTargets(`<div class="leaderboard-empty">全球排行榜讀取中...</div>`);
+    try {
+      const { data, error } = await supabaseClient
+        .from("leaderboard")
+        .select("player_name, score")
+        .order("score", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        renderLeaderboardTargets(`<div class="leaderboard-empty">目前尚無排行榜紀錄，搶下第一名吧！</div>`);
+        return;
+      }
+
+      const html = data.map((row, index) => {
+        const rank = index + 1;
+        const rankLabel = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `#${rank}`;
+        const rankClass = rank <= 3 ? ` rank-${rank}` : "";
+        const safeName = escapeHtml(row.player_name || "匿名玩家");
+        const safeScore = Number(row.score || 0).toLocaleString();
+        return `
+          <div class="leaderboard-row${rankClass}">
+            <span class="leaderboard-rank">${rankLabel}</span>
+            <span class="leaderboard-name">${safeName}</span>
+            <span class="leaderboard-score">${safeScore}</span>
+          </div>
+        `;
+      }).join("");
+      renderLeaderboardTargets(html);
+    } catch (err) {
+      console.error("讀取排行榜失敗：", err);
+      renderLeaderboardTargets(`<div class="leaderboard-empty">⚠️ 無法載入排行榜，請稍後再試</div>`);
+    }
+  }
+
+  async function submitLeaderboardScore() {
+    if (isTestModeActive()) {
+      leaderboardSubmitFeedback.textContent = "⚠️ 測試／開發者模式下無法上傳至全球排行榜。";
+      leaderboardSubmitFeedback.className = "leaderboard-feedback error";
+      return;
+    }
+    if (state.isUploadingLeaderboard || state.hasUploadedCurrentSettlement) return;
+    if (!supabaseClient) {
+      leaderboardSubmitFeedback.textContent = "⚠️ 尚未連線至排行榜服務，請確認網路連線。";
+      leaderboardSubmitFeedback.className = "leaderboard-feedback error";
+      return;
+    }
+
+    const trimmedName = leaderboardNameInput.value.trim();
+    if (!trimmedName) {
+      leaderboardSubmitFeedback.textContent = "⚠️ 請先輸入玩家暱稱（不可空白）。";
+      leaderboardSubmitFeedback.className = "leaderboard-feedback error";
+      leaderboardNameInput.focus();
+      return;
+    }
+    if (trimmedName.length > 20) {
+      leaderboardSubmitFeedback.textContent = "⚠️ 玩家暱稱請限制在 20 字以內。";
+      leaderboardSubmitFeedback.className = "leaderboard-feedback error";
+      leaderboardNameInput.focus();
+      return;
+    }
+
+    const scoreToUpload = Math.max(0, Math.floor(state.credits));
+    state.isUploadingLeaderboard = true;
+    leaderboardSubmitBtn.disabled = true;
+    leaderboardSubmitBtn.textContent = "上傳中...";
+    leaderboardSubmitFeedback.textContent = "正在寫入全球排行榜...";
+    leaderboardSubmitFeedback.className = "leaderboard-feedback";
+
+    try {
+      const { error } = await supabaseClient
+        .from("leaderboard")
+        .insert([{ player_name: trimmedName, score: scoreToUpload }]);
+
+      if (error) throw error;
+
+      state.hasUploadedCurrentSettlement = true;
+      leaderboardSubmitBtn.textContent = "✅ 已上傳";
+      leaderboardNameInput.disabled = true;
+      leaderboardSubmitFeedback.textContent = `✅ 已成功上傳 ${trimmedName}（${scoreToUpload.toLocaleString()} 點）至全球排行榜！`;
+      leaderboardSubmitFeedback.className = "leaderboard-feedback success";
+      await fetchAndRenderLeaderboard();
+    } catch (err) {
+      console.error("上傳排行榜失敗：", err);
+      leaderboardSubmitBtn.disabled = false;
+      leaderboardSubmitBtn.textContent = "🏆 上傳分數";
+      leaderboardSubmitFeedback.textContent = "⚠️ 上傳失敗，請稍後再試。";
+      leaderboardSubmitFeedback.className = "leaderboard-feedback error";
+    } finally {
+      state.isUploadingLeaderboard = false;
+    }
+  }
+
   function openSettlement(customTitle = "本局結算報告", { allowOnMaxWin = false } = {}) {
     if (anySpinning()) return;
     if (isTestModeActive() && !allowOnMaxWin) return;
@@ -1572,6 +1701,22 @@
     settleShareThreadsBtn.hidden = hideShare;
     shareSettleBtn.hidden = hideShare;
     settleDisableDevRestartBtn.hidden = !state.devUnlocked;
+
+    state.isUploadingLeaderboard = false;
+    state.hasUploadedCurrentSettlement = false;
+    if (leaderboardUploadBox) {
+      leaderboardUploadBox.hidden = hideShare;
+    }
+    if (!hideShare && leaderboardNameInput && leaderboardSubmitBtn && leaderboardSubmitFeedback) {
+      leaderboardNameInput.disabled = false;
+      leaderboardNameInput.value = "";
+      leaderboardSubmitBtn.disabled = false;
+      leaderboardSubmitBtn.textContent = "🏆 上傳分數";
+      leaderboardSubmitFeedback.textContent = `本次將上傳最終餘額：${Math.max(0, Math.floor(state.credits)).toLocaleString()} 點`;
+      leaderboardSubmitFeedback.className = "leaderboard-feedback";
+    }
+    fetchAndRenderLeaderboard();
+
     settlementScreen.hidden = false;
     updateUI();
   }
@@ -2263,6 +2408,24 @@
     restartGame({ showStart: false });
   });
 
+  if (leaderboardSubmitBtn) {
+    leaderboardSubmitBtn.addEventListener("click", submitLeaderboardScore);
+  }
+  if (leaderboardNameInput) {
+    leaderboardNameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitLeaderboardScore();
+      }
+    });
+  }
+  if (startLeaderboardRefreshBtn) {
+    startLeaderboardRefreshBtn.addEventListener("click", fetchAndRenderLeaderboard);
+  }
+  if (settleLeaderboardRefreshBtn) {
+    settleLeaderboardRefreshBtn.addEventListener("click", fetchAndRenderLeaderboard);
+  }
+
   gameOverDisableDevRestartBtn.addEventListener("click", disableDevAndRestart);
   settleDisableDevRestartBtn.addEventListener("click", disableDevAndRestart);
 
@@ -2597,4 +2760,5 @@
   renderStartLatestUpdates();
   renderPaytable();
   updateUI();
+  fetchAndRenderLeaderboard();
 })();
