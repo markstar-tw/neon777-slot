@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.048"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.049"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -1373,6 +1373,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.049", time: "2026-11-27 19:46", desc: "將開始畫面、規則圖示與排行榜前三名獎牌全面升級為高清向量 SVG。" },
     { ver: "v26.01.048", time: "2026-11-27 19:43", desc: "將設定與選項彈窗圖示（含手機震動開關）全面升級為大型高清向量 SVG。" },
     { ver: "v26.01.047", time: "2026-11-27 19:36", desc: "將右上角選單圖示全面升級為高清放大向量 SVG 圖示。" },
     { ver: "v26.01.046", time: "2026-11-27 19:31", desc: "優化新手教學模式：點選後直接進入遊戲無需再按開始，並自動偵測 Xbox 搖桿與手機模式顯示專屬操作導覽。" },
@@ -1665,7 +1666,9 @@
 
       const html = data.map((row, index) => {
         const rank = index + 1;
-        const rankLabel = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `#${rank}`;
+        const rankLabel = rank <= 3
+          ? `<svg class="medal-svg" viewBox="0 0 24 24" aria-label="第${rank}名"><use href="#ico-medal-${rank}"/></svg>`
+          : `#${rank}`;
         const rankClass = rank <= 3 ? ` rank-${rank}` : "";
         const safeName = escapeHtml(row.player_name || "匿名玩家");
         const safeScore = Number(row.score || 0).toLocaleString();
