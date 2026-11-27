@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.029"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.030"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -55,8 +55,32 @@
     return +weight.toFixed(2);
   }
 
+  function getMidgameSevenProfile() {
+    const active = state.spinCount >= 8 || state.credits >= 5000;
+    if (!active) {
+      return {
+        active: false,
+        weightMult: 1,
+        threeSevensChance: 0,
+        fiveSevensChance: 0
+      };
+    }
+    const spinProgress = Math.max(0, Math.min(1, (state.spinCount - 8) / 17));
+    const creditProgress = Math.max(0, Math.min(1, (state.credits - 5000) / 95000));
+    const intensity = Math.max(0.45, spinProgress, creditProgress);
+    return {
+      active: true,
+      weightMult: +(1 + 1.1 * intensity).toFixed(2),
+      threeSevensChance: +(0.06 + 0.06 * intensity).toFixed(4),
+      fiveSevensChance: +(0.015 + 0.025 * intensity).toFixed(4)
+    };
+  }
+
   function getSymbolWeight(sym, { applySecretBurst = false } = {}) {
     let w = sym.id === "bomb" ? getDynamicBombWeight() : sym.weight;
+    if (sym.id === "seven") {
+      w *= getMidgameSevenProfile().weightMult;
+    }
     // 連轉 ×5 模式偷偷提高炸彈與紅中出現率
     if (applySecretBurst && state.burstRemaining > 0) {
       if (sym.id === "bomb") w *= 1.65;
@@ -496,6 +520,40 @@
           return true;
         }
       }
+    }
+    return false;
+  }
+
+  function placeSevenLine(cols, len) {
+    const sevenSym = SYMBOLS.find((s) => s.id === "seven");
+    const dirs = [
+      [1, 0],
+      [0, 1],
+      [1, 1],
+      [-1, 1]
+    ];
+    for (let attempt = 0; attempt < 24; attempt++) {
+      const [dc, dr] = dirs[Math.floor(Math.random() * dirs.length)];
+      const minC = dc < 0 ? len - 1 : 0;
+      const maxC = dc > 0 ? GRID_COLS - len : GRID_COLS - 1;
+      const maxR = dr > 0 ? GRID_ROWS - len : GRID_ROWS - 1;
+      const startC = minC + Math.floor(Math.random() * (maxC - minC + 1));
+      const startR = Math.floor(Math.random() * (maxR + 1));
+
+      let blocked = false;
+      for (let k = 0; k < len; k++) {
+        const cell = cols[startC + dc * k][startR + dr * k];
+        if (cell.id === "tw" || cell.id === "eightball" || cell.id === "mahjong") {
+          blocked = true;
+          break;
+        }
+      }
+      if (blocked) continue;
+
+      for (let k = 0; k < len; k++) {
+        cols[startC + dc * k][startR + dr * k] = sevenSym;
+      }
+      return true;
     }
     return false;
   }
@@ -1206,6 +1264,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.030", time: "2026-11-27 17:14", desc: "新增遊戲中期（滿 8 轉或 5,000 點以上）幸運 7 加成，提高 777 與 77777 連線出線機率。" },
     { ver: "v26.01.029", time: "2026-11-27 16:12", desc: "轉盤全面高清化：升級 11 種街機向量 SVG 符號、放大盤面尺寸並移除滾動模糊。" },
     { ver: "v26.01.028", time: "2026-11-27 15:42", desc: "調整 🎱 雙黑八規則：分開保留最後 1 元、相連直接遊戲結束。" },
     { ver: "v26.01.027", time: "2026-11-27 15:35", desc: "優化更新日誌分類與系統體驗調校。" },
@@ -1279,12 +1338,18 @@
       state.burstRemaining > 0 && `連轉剩${state.burstRemaining}`
     ].filter(Boolean);
 
+    const midProfile = getMidgameSevenProfile();
+    const midSevenText = midProfile.active
+      ? `啟動中（權重 ×${midProfile.weightMult.toFixed(2)}｜777 ${(midProfile.threeSevensChance * 100).toFixed(1)}%｜77777 ${(midProfile.fiveSevensChance * 100).toFixed(1)}%）`
+      : "未啟動（需滿 8 轉或 5,000 點）";
+
     devStatsBox.innerHTML = formatTwFlags(`
       版本：<strong>v${APP_VERSION}</strong> ｜ 模式：<strong>${state.betMode}</strong> ｜ 狀態：<strong>${state.isSettled ? "已結算" : anySpinning() ? "轉動中" : "待機"}</strong><br>
       餘額：<strong>${state.credits.toLocaleString()}</strong>（最高 <strong>${state.peakCredits.toLocaleString()}</strong>）｜ 淨損益：<strong>${netText}</strong><br>
       動態上限：<strong>${getDynamicMaxBet(machines.length)}</strong> ｜ 押注 A/B：<strong>${machines[0].bet} / ${machines[1].bet}</strong><br>
       獎池 A/B：<strong>${machines[0].jackpot.toLocaleString()} / ${machines[1].jackpot.toLocaleString()}</strong> ｜ ULTRA：<strong>${state.ultraJackpot.toLocaleString()}</strong><br>
       💣 炸彈權重：<strong>${getDynamicBombWeight()}</strong>（${getBombRatePercent()}% / 上限50%）<br>
+      7️⃣ 中期加成：<strong>${midSevenText}</strong><br>
       累計總押：<strong>${state.totalBetSpent.toLocaleString()}</strong> ｜ 累計總贏：<strong>${state.totalGrossWon.toLocaleString()}</strong><br>
       總轉數：<strong>${state.spinCount}</strong> ｜ GRAND/ULTRA：<strong>${state.jackpotHits}/${state.ultraHits}</strong> ｜ 🀄/🎱：<strong>${state.mahjongHits}/${state.eightBallHits}</strong><br>
       自動/護盾：<strong>${autoFlags.length ? autoFlags.join("、") : "無"}</strong> ｜ 極速:${state.devFastSpin ? "開" : "關"} 防黑八:${state.devGodMode ? "開" : "關"} 炸彈盾:${state.devBombShield ? "開" : "關"}<br>
@@ -1681,6 +1746,26 @@
         const r = Math.floor(Math.random() * GRID_ROWS);
         for (let k = 0; k < 6; k++) {
           board[3 + k][r] = bombSym;
+        }
+      }
+
+      // 遊戲中期（滿 8 轉或 5,000 點以上）自然提高 777 與 77777 連線機率
+      const midSevenProfile = getMidgameSevenProfile();
+      if (
+        midSevenProfile.active &&
+        !triggerSecretTaiwan &&
+        !triggerFiveSevens &&
+        !triggerNuke &&
+        !triggerDoubleBlack &&
+        !triggerSplitBlack &&
+        !triggerSecretBlack &&
+        countTw(board) === 0
+      ) {
+        const sevenRoll = Math.random();
+        if (sevenRoll < midSevenProfile.fiveSevensChance && !hasFiveSevens(board)) {
+          placeSevenLine(board, 5);
+        } else if (sevenRoll < midSevenProfile.fiveSevensChance + midSevenProfile.threeSevensChance) {
+          placeSevenLine(board, 3);
         }
       }
 
