@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.051"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.052"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -1449,6 +1449,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.052", time: "2026-11-27 22:14", desc: "新增 PWA 漸進式網頁應用支援（電腦與手機皆可一鍵安裝離線版 App）。" },
     { ver: "v26.01.051", time: "2026-11-27 19:58", desc: "為機台 GRAND JACKPOT 徽章加入滑鼠懸停與手機點擊說明提示卡。" },
     { ver: "v26.01.050", time: "2026-11-27 19:53", desc: "全站所有可見圖示（按鈕、彈窗、機台狀態、歷史紀錄與符號說明）全面升級為統一風格放大向量 SVG。" },
     { ver: "v26.01.049", time: "2026-11-27 19:46", desc: "將開始畫面、規則圖示與排行榜前三名獎牌全面升級為高清向量 SVG。" },
@@ -3645,5 +3646,63 @@
   fetchAndRenderLeaderboard();
   if (navigator.getGamepads && Array.from(navigator.getGamepads()).some((p) => p && p.connected)) {
     startGamepadPolling();
+  }
+
+  // PWA Service Worker 註冊與安裝下載版 App 按鈕支援
+  const startInstallAppBtn = document.getElementById("startInstallAppBtn");
+  const menuInstallAppBtn = document.getElementById("menuInstallAppBtn");
+  let deferredInstallPrompt = null;
+
+  function isPwaStandalone() {
+    return (
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+      window.navigator.standalone === true
+    );
+  }
+
+  function isIosSafari() {
+    const ua = window.navigator.userAgent || "";
+    return /iP(hone|ad|od)/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua);
+  }
+
+  function refreshPwaInstallButtons() {
+    const canShow = !isPwaStandalone() && (Boolean(deferredInstallPrompt) || isIosSafari());
+    if (startInstallAppBtn) startInstallAppBtn.hidden = !canShow;
+    if (menuInstallAppBtn) menuInstallAppBtn.hidden = !canShow;
+  }
+
+  async function triggerPwaInstall() {
+    closeMenu();
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      try {
+        await deferredInstallPrompt.userChoice;
+      } catch (_) {}
+      deferredInstallPrompt = null;
+      refreshPwaInstallButtons();
+    } else if (isIosSafari()) {
+      window.alert("請點擊 Safari 下方「分享」圖示，再選擇「加入主畫面」，即可安裝成獨立 App！");
+    }
+  }
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    refreshPwaInstallButtons();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    refreshPwaInstallButtons();
+  });
+
+  if (startInstallAppBtn) startInstallAppBtn.addEventListener("click", triggerPwaInstall);
+  if (menuInstallAppBtn) menuInstallAppBtn.addEventListener("click", triggerPwaInstall);
+  refreshPwaInstallButtons();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
   }
 })();

@@ -1,0 +1,26 @@
+{
+  "name": "街霸拉機 NEON777",
+  "short_name": "NEON777",
+  "description": "雙機 16×16 超大盤面街機拉霸！支援全方向連線兌獎、動態炸彈風險、三層獎池、Xbox 搖桿與全球排行榜。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0d17",
+  "theme_color": "#ff3e8a",
+  "lang": "zh-Hant",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
