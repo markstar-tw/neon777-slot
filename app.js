@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.046"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.047"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -1348,10 +1348,16 @@
     return state.devUnlocked || state.cheatUsed;
   }
 
+  function setMenuSettleLabel(text) {
+    const labelEl = menuSettleBtn.querySelector(".menu-item-label");
+    if (labelEl) labelEl.textContent = text;
+    else menuSettleBtn.textContent = text;
+  }
+
   function markCheatActivated() {
     state.cheatUsed = true;
     menuSettleBtn.disabled = true;
-    menuSettleBtn.textContent = state.devUnlocked ? "🏁 結算（開發者模式鎖定）" : "🏁 結算（已鎖定）";
+    setMenuSettleLabel(state.devUnlocked ? "結算（開發者模式鎖定）" : "結算（已鎖定）");
   }
 
   function renderDevCodesList() {
@@ -1367,6 +1373,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.047", time: "2026-11-27 19:36", desc: "將右上角選單圖示全面升級為高清放大向量 SVG 圖示。" },
     { ver: "v26.01.046", time: "2026-11-27 19:31", desc: "優化新手教學模式：點選後直接進入遊戲無需再按開始，並自動偵測 Xbox 搖桿與手機模式顯示專屬操作導覽。" },
     { ver: "v26.01.045", time: "2026-11-27 19:28", desc: "新增 5 步驟互動式「📖 新手教學模式」，可於開始畫面與右上角選單隨時開啟。" },
     { ver: "v26.01.044", time: "2026-11-27 19:22", desc: "將音效開關整合至選單設定，並於電腦模式隱藏手機震動選項。" },
@@ -1503,7 +1510,7 @@
     devPanelBtn.hidden = false;
     if (menuDisableDevRestartBtn) menuDisableDevRestartBtn.hidden = false;
     menuSettleBtn.disabled = true;
-    menuSettleBtn.textContent = "🏁 結算（開發者模式鎖定）";
+    setMenuSettleLabel("結算（開發者模式鎖定）");
     closeMenu();
     renderDevCodesList();
     refreshDevPanel();
@@ -1538,7 +1545,7 @@
     state.isSettled = false;
     state.cheatUsed = state.devUnlocked;
     menuSettleBtn.disabled = state.devUnlocked;
-    menuSettleBtn.textContent = state.devUnlocked ? "🏁 結算（開發者模式鎖定）" : "🏁 結算並結束本局";
+    setMenuSettleLabel(state.devUnlocked ? "結算（開發者模式鎖定）" : "結算並結束本局");
     state.currentBet = 25;
     state.lastNetWin = 0;
     state.ultraJackpot = INITIAL_ULTRA_JACKPOT;
