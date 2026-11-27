@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.028"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.029"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -32,7 +32,8 @@
   }
 
   function renderSymbolIcon(sym) {
-    return sym.id === "tw" ? TW_FLAG_HTML : sym.icon;
+    if (sym.id === "tw") return TW_FLAG_HTML;
+    return `<svg class="sym-svg sym-${sym.id}" viewBox="0 0 64 64" aria-hidden="true"><use href="#sym-${sym.id}"/></svg>`;
   }
 
   const BASE_BOMB_WEIGHT = 3.5;
@@ -749,7 +750,7 @@
         const bombStep = getConnectStepMs(bombCells.size);
         reelStrips.forEach((strip, colIdx) => {
           strip.style.transition = "none";
-          strip.style.transform = "translateY(0)";
+          strip.style.transform = "translate3d(0, 0, 0)";
           strip.innerHTML = machine.currentCols[colIdx]
             .map((sym, rowIdx) => {
               const key = `${colIdx}-${rowIdx}`;
@@ -806,14 +807,14 @@
             items.push(...nextCols[colIdx]);
 
             strip.style.transition = "none";
-            strip.style.transform = "translateY(0)";
+            strip.style.transform = "translate3d(0, 0, 0)";
             strip.innerHTML = items.map((s) => `<div class="symbol-cell">${renderSymbolIcon(s)}</div>`).join("");
             void strip.offsetHeight;
 
             winBox.classList.add("spinning");
             const targetY = -((items.length - GRID_ROWS) * symbolH);
             strip.style.transition = `transform ${duration}ms cubic-bezier(0.12, 0.92, 0.24, 1.06)`;
-            strip.style.transform = `translateY(${targetY}px)`;
+            strip.style.transform = `translate3d(0, ${targetY}px, 0)`;
 
             setTimeout(() => {
               winBox.classList.remove("spinning");
@@ -836,7 +837,7 @@
             playConnectDaDaDaSound(result.winCells.size);
           }
           if (result.voidedByEightBall) {
-            eightBallLayerEl.innerHTML = `<div class="eightball-drop">🎱</div>`;
+            eightBallLayerEl.innerHTML = `<div class="eightball-drop"><svg class="eightball-drop-svg" viewBox="0 0 64 64" aria-hidden="true"><use href="#sym-eightball"/></svg></div>`;
             playEightBallDropSound();
             setTimeout(() => {
               eightBallLayerEl.innerHTML = "";
@@ -1205,6 +1206,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.029", time: "2026-11-27 16:12", desc: "轉盤全面高清化：升級 11 種街機向量 SVG 符號、放大盤面尺寸並移除滾動模糊。" },
     { ver: "v26.01.028", time: "2026-11-27 15:42", desc: "調整 🎱 雙黑八規則：分開保留最後 1 元、相連直接遊戲結束。" },
     { ver: "v26.01.027", time: "2026-11-27 15:35", desc: "優化更新日誌分類與系統體驗調校。" },
     { ver: "v26.01.026", time: "2026-11-27 15:13", desc: "新增神祕彩蛋機制與極限數值安全防護。" },
@@ -1835,7 +1837,8 @@
             : s.isPenalty
               ? `懲罰：3連 −×${m3} ～ ${MAX_CHAIN_CAP}連 −×${m8}`
               : `3連 ×${m3} / 5連 ×${m5} / ${MAX_CHAIN_CAP}連(上限) ×${m8}`;
-      const comboText = (s.isSpecial || s.isTopJackpot || s.isVoid) ? renderSymbolIcon(s) : `${s.icon} ${s.icon} ${s.icon}`;
+      const iconHtml = renderSymbolIcon(s);
+      const comboText = (s.isSpecial || s.isTopJackpot || s.isVoid) ? iconHtml : `${iconHtml}${iconHtml}${iconHtml}`;
       return `
         <div class="paytable-row">
           <span class="paytable-combo">${comboText}</span>
