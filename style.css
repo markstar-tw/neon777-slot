@@ -598,6 +598,12 @@ body {
   font-weight: 600;
 }
 
+.machine-jackpot-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .machine-jackpot {
   font-size: 12px;
   font-weight: 800;
@@ -607,6 +613,52 @@ body {
   border-radius: 999px;
   padding: 3px 10px;
   font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.machine-jackpot:hover,
+.machine-jackpot-wrap.show-tip .machine-jackpot {
+  background: rgba(245, 197, 66, 0.22);
+  border-color: rgba(245, 197, 66, 0.75);
+}
+
+.machine-jackpot-tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 240px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 12px;
+  background: #14192e;
+  border: 1px solid rgba(245, 197, 66, 0.55);
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.78);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-main);
+  text-align: left;
+  z-index: 45;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
+}
+
+.machine-jackpot-tip strong {
+  color: var(--gold-bright);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.machine-jackpot-wrap:hover .machine-jackpot-tip,
+.machine-jackpot-wrap:focus-within .machine-jackpot-tip,
+.machine-jackpot-wrap.show-tip .machine-jackpot-tip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 /* Meters */

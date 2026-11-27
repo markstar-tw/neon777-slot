@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.050"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.051"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -887,7 +887,12 @@
       <div class="cabinet-head">
         <span class="cabinet-title">${formatTwFlags(title)}</span>
         <div class="cabinet-actions">
-          <span class="machine-jackpot" title="本台獨立 GRAND JACKPOT">${formatTwFlags(`🏆 ${initialJackpot.toLocaleString()}`)}</span>
+          <div class="machine-jackpot-wrap">
+            <button class="machine-jackpot" type="button" aria-label="本台獨立 GRAND JACKPOT 說明">${formatTwFlags(`🏆 ${initialJackpot.toLocaleString()}`)}</button>
+            <div class="machine-jackpot-tip" role="tooltip">
+              ${formatTwFlags(`<strong>🏆 ${title} 獨立 GRAND JACKPOT</strong>每轉投入押注 25% 累積；出現 5 連 7️⃣ 或 1 顆 🇹🇼 即可獨得此獎池！`)}
+            </div>
+          </div>
           <button class="mini-spin-btn" type="button">單台轉動</button>
           <button class="mini-allin-btn" type="button" title="將目前全部本金單押此台">ALL IN</button>
         </div>
@@ -917,8 +922,18 @@
     const betMinusBtn = section.querySelector('[data-dir="-1"]');
     const betPlusBtn = section.querySelector('[data-dir="1"]');
     const miniAutoBtn = externalAutoBtn;
+    const jackpotWrapEl = section.querySelector(".machine-jackpot-wrap");
     const jackpotBadgeEl = section.querySelector(".machine-jackpot");
     const eightBallLayerEl = section.querySelector(".eightball-drop-layer");
+
+    if (jackpotBadgeEl && jackpotWrapEl) {
+      jackpotBadgeEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const willShow = !jackpotWrapEl.classList.contains("show-tip");
+        document.querySelectorAll(".machine-jackpot-wrap.show-tip").forEach((el) => el.classList.remove("show-tip"));
+        if (willShow) jackpotWrapEl.classList.add("show-tip");
+      });
+    }
 
     const reelWindows = [];
     const reelStrips = [];
@@ -1434,6 +1449,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.051", time: "2026-11-27 19:58", desc: "為機台 GRAND JACKPOT 徽章加入滑鼠懸停與手機點擊說明提示卡。" },
     { ver: "v26.01.050", time: "2026-11-27 19:53", desc: "全站所有可見圖示（按鈕、彈窗、機台狀態、歷史紀錄與符號說明）全面升級為統一風格放大向量 SVG。" },
     { ver: "v26.01.049", time: "2026-11-27 19:46", desc: "將開始畫面、規則圖示與排行榜前三名獎牌全面升級為高清向量 SVG。" },
     { ver: "v26.01.048", time: "2026-11-27 19:43", desc: "將設定與選項彈窗圖示（含手機震動開關）全面升級為大型高清向量 SVG。" },
@@ -3120,6 +3136,9 @@
   });
 
   document.addEventListener("click", (e) => {
+    if (!e.target.closest(".machine-jackpot-wrap")) {
+      document.querySelectorAll(".machine-jackpot-wrap.show-tip").forEach((el) => el.classList.remove("show-tip"));
+    }
     if (!gameMenu.hidden && !gameMenu.contains(e.target) && e.target !== menuBtn) {
       closeMenu();
     }
