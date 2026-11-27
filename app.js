@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.052"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.02.000"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -1449,7 +1449,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
-    { ver: "v26.01.052", time: "2026-11-27 22:14", desc: "新增 PWA 漸進式網頁應用支援（電腦與手機皆可一鍵安裝離線版 App）。" },
+    { ver: "v26.02.000", time: "2026-11-27 22:17", desc: "大版本更新：支援 PWA 離線下載版 App、全站高清向量 SVG 視覺重繪、Xbox 搖桿相容模式、新手教學導覽與全球排行榜系統！" },
     { ver: "v26.01.051", time: "2026-11-27 19:58", desc: "為機台 GRAND JACKPOT 徽章加入滑鼠懸停與手機點擊說明提示卡。" },
     { ver: "v26.01.050", time: "2026-11-27 19:53", desc: "全站所有可見圖示（按鈕、彈窗、機台狀態、歷史紀錄與符號說明）全面升級為統一風格放大向量 SVG。" },
     { ver: "v26.01.049", time: "2026-11-27 19:46", desc: "將開始畫面、規則圖示與排行榜前三名獎牌全面升級為高清向量 SVG。" },
