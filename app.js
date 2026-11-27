@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.043"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.044"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -216,7 +216,6 @@
   const autoMachineABtn = document.getElementById("autoMachineABtn");
   const autoMachineBBtn = document.getElementById("autoMachineBBtn");
   const autoSpinBtn = document.getElementById("autoSpinBtn");
-  const soundToggleBtn = document.getElementById("soundToggle");
 
   const paytableModal = document.getElementById("paytableModal");
   const closePaytableBtn = document.getElementById("closePaytableBtn");
@@ -1358,6 +1357,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.044", time: "2026-11-27 19:22", desc: "將音效開關整合至選單設定，並於電腦模式隱藏手機震動選項。" },
     { ver: "v26.01.043", time: "2026-11-27 19:09", desc: "介面精簡與設定選項整合最佳化。" },
     { ver: "v26.01.042", time: "2026-11-27 19:08", desc: "選單新增「⚙️ 設定與選項」（含靜音、手機震動與手把震動開關），並加入轉輪停止震動回饋。" },
     { ver: "v26.01.041", time: "2026-11-27 19:06", desc: "新增 Xbox 搖桿相容模式，支援全按鈕操作與雙馬達震動回饋。" },
@@ -3041,7 +3041,6 @@
   });
 
   function syncSettingsUI() {
-    soundToggleBtn.textContent = state.soundEnabled ? "🔊 音效開" : "🔇 靜音";
     if (settingSoundBtn) {
       settingSoundBtn.classList.toggle("active", state.soundEnabled);
       settingSoundBtn.textContent = state.soundEnabled ? "🔊 遊戲音效：開" : "🔇 遊戲音效：靜音";
@@ -3059,11 +3058,6 @@
       settingGamepadInputBtn.textContent = state.gamepadEnabled ? "🕹️ 搖桿控制：開" : "🕹️ 搖桿控制：關";
     }
   }
-
-  soundToggleBtn.addEventListener("click", () => {
-    state.soundEnabled = !state.soundEnabled;
-    syncSettingsUI();
-  });
 
   if (menuSettingsBtn) {
     menuSettingsBtn.addEventListener("click", () => {
@@ -3269,7 +3263,8 @@
       const nextBtn = modeList[(curIdx + 1) % modeList.length];
       if (nextBtn) nextBtn.click(); // RT / 下: 切換押注模式
     } else if (btnIdx === 8) {
-      soundToggleBtn.click(); // View: 音效開關
+      state.soundEnabled = !state.soundEnabled;
+      syncSettingsUI(); // View: 音效開關
     } else if (btnIdx === 9) {
       menuBtn.click(); // Menu: 開關選單
     }
