@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.032"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.033"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -216,6 +216,7 @@
   const gameOverShareXBtn = document.getElementById("gameOverShareXBtn");
   const gameOverShareThreadsBtn = document.getElementById("gameOverShareThreadsBtn");
   const gameOverShareOtherBtn = document.getElementById("gameOverShareOtherBtn");
+  const gameOverDisableDevRestartBtn = document.getElementById("gameOverDisableDevRestartBtn");
   const gameOverRestartBtn = document.getElementById("gameOverRestartBtn");
   const gameOverHomeBtn = document.getElementById("gameOverHomeBtn");
 
@@ -252,6 +253,7 @@
   const settleShareXBtn = document.getElementById("shareXBtn");
   const settleShareThreadsBtn = document.getElementById("shareThreadsBtn");
   const shareSettleBtn = document.getElementById("shareSettleBtn");
+  const settleDisableDevRestartBtn = document.getElementById("settleDisableDevRestartBtn");
   const settleRestartBtn = document.getElementById("settleRestartBtn");
 
   const devPanelModal = document.getElementById("devPanelModal");
@@ -1292,6 +1294,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.033", time: "2026-11-27 17:30", desc: "完善結算與通關規範機制，並新增重開局選項。" },
     { ver: "v26.01.032", time: "2026-11-27 17:28", desc: "系統體驗最佳化與問題修正。" },
     { ver: "v26.01.031", time: "2026-11-27 17:18", desc: "新增神祕彩蛋機制與系統體驗最佳化。" },
     { ver: "v26.01.030", time: "2026-11-27 17:14", desc: "新增遊戲中期（滿 8 轉或 5,000 點以上）幸運 7 加成，提高 777 與 77777 連線出線機率。" },
@@ -1473,6 +1476,28 @@
     updateUI();
   }
 
+  function disableDevAndRestart() {
+    state.devUnlocked = false;
+    state.devFastSpin = false;
+    state.devGodMode = false;
+    state.devBombShield = false;
+    state.devNoZeroEnd = false;
+    state.secretTaiwanPending = false;
+    state.secretBlackPending = false;
+    state.secretDoubleBlackPending = false;
+    state.secretSplitBlackPending = false;
+    state.secretMahjongPending = false;
+    state.secretFiveSevensPending = false;
+    state.secretNukePending = false;
+    state.secretStarfallPending = false;
+    state.secretUnlimitPending = false;
+    state.secretFullBoardSymbol = null;
+    state.secretFullBoardRemaining = 0;
+    devPanelBtn.hidden = true;
+    devPanelModal.hidden = true;
+    restartGame({ showStart: false });
+  }
+
   function checkGameOver(instantReason = null) {
     if (!anySpinning() && ((state.credits <= 0 && !state.devNoZeroEnd) || instantReason)) {
       stopAutoAndBurst();
@@ -1486,6 +1511,7 @@
       gameOverShareXBtn.hidden = blockedRecord;
       gameOverShareThreadsBtn.hidden = blockedRecord;
       gameOverShareOtherBtn.hidden = blockedRecord;
+      gameOverDisableDevRestartBtn.hidden = !state.devUnlocked;
       gameOverScreen.hidden = false;
       return true;
     }
@@ -1514,17 +1540,28 @@
     closeMenu();
     state.isSettled = true;
     settleTitle.textContent = customTitle;
-    const rows = getSettlementRows();
-    settleStatsGrid.innerHTML = rows.map((r) => `
-      <div class="settle-stat-item">
-        <span class="settle-stat-label">${r.label}</span>
-        <span class="settle-stat-val">${r.value}</span>
-      </div>
-    `).join("");
     const hideShare = isTestModeActive();
+    if (hideShare) {
+      settleStatsGrid.innerHTML = `
+        <div class="settle-stat-item" style="grid-column: 1 / -1;">
+          <span class="settle-stat-label">測試／開發者模式保護</span>
+          <span class="settle-stat-val">⚠️ 本局已啟用開發者或測試密技，成績不列入紀錄，且無法分享或下載圖片。</span>
+        </div>
+      `;
+    } else {
+      const rows = getSettlementRows();
+      settleStatsGrid.innerHTML = rows.map((r) => `
+        <div class="settle-stat-item">
+          <span class="settle-stat-label">${r.label}</span>
+          <span class="settle-stat-val">${r.value}</span>
+        </div>
+      `).join("");
+    }
+    downloadSettleImgBtn.hidden = hideShare;
     settleShareXBtn.hidden = hideShare;
     settleShareThreadsBtn.hidden = hideShare;
     shareSettleBtn.hidden = hideShare;
+    settleDisableDevRestartBtn.hidden = !state.devUnlocked;
     settlementScreen.hidden = false;
     updateUI();
   }
@@ -1538,6 +1575,7 @@
   }
 
   function downloadSettlementImage() {
+    if (isTestModeActive()) return;
     const canvas = document.createElement("canvas");
     canvas.width = 920;
     canvas.height = 640;
@@ -2214,6 +2252,9 @@
   settleRestartBtn.addEventListener("click", () => {
     restartGame({ showStart: false });
   });
+
+  gameOverDisableDevRestartBtn.addEventListener("click", disableDevAndRestart);
+  settleDisableDevRestartBtn.addEventListener("click", disableDevAndRestart);
 
   menuRestartBtn.addEventListener("click", () => {
     restartGame({ showStart: false });
