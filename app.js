@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.045"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.046"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -263,6 +263,7 @@
   const tutorialModal = document.getElementById("tutorialModal");
   const closeTutorialBtn = document.getElementById("closeTutorialBtn");
   const tutorialStepBadge = document.getElementById("tutorialStepBadge");
+  const tutorialDeviceBadge = document.getElementById("tutorialDeviceBadge");
   const tutorialBody = document.getElementById("tutorialBody");
   const tutorialDots = document.getElementById("tutorialDots");
   const tutorialPrevBtn = document.getElementById("tutorialPrevBtn");
@@ -1366,6 +1367,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.046", time: "2026-11-27 19:31", desc: "優化新手教學模式：點選後直接進入遊戲無需再按開始，並自動偵測 Xbox 搖桿與手機模式顯示專屬操作導覽。" },
     { ver: "v26.01.045", time: "2026-11-27 19:28", desc: "新增 5 步驟互動式「📖 新手教學模式」，可於開始畫面與右上角選單隨時開啟。" },
     { ver: "v26.01.044", time: "2026-11-27 19:22", desc: "將音效開關整合至選單設定，並於電腦模式隱藏手機震動選項。" },
     { ver: "v26.01.043", time: "2026-11-27 19:09", desc: "介面精簡與設定選項整合最佳化。" },
@@ -3069,84 +3071,132 @@
     }
   }
 
-  const TUTORIAL_STEPS = [
-    {
-      title: "1. 雙機 16×16 盤面與基礎玩法",
-      html: `
-        <p>每次開局擁有 <strong>2,000 點</strong>，畫面上方為共用 <strong>ULTRA GRAND JACKPOT</strong>，下方兩台拉霸機（A／B）可獨立或同時轉動。</p>
-        <ul>
-          <li>每台皆為 16×16 超大盤面，<strong>橫列、直行、左右斜線</strong>出現連續 3 顆以上相同符號即可兌獎（預設上限 8 連）。</li>
-          <li>點擊 <strong>雙機齊發（SPACE）</strong> 享 <strong>95 折（省 5%）</strong>；點擊 <strong>🔥 連轉 ×5</strong> 享 <strong>9 折（省 10%）</strong>！</li>
-        </ul>
+  function detectTutorialControlMode() {
+    const isXbox = Boolean(state.gamepadConnected && state.gamepadEnabled);
+    const isMobile = Boolean(
+      window.matchMedia && window.matchMedia("(max-width: 980px), (pointer: coarse)").matches
+    );
+    if (isXbox) return "xbox";
+    if (isMobile) return "mobile";
+    return "desktop";
+  }
+
+  function getTutorialSteps() {
+    const mode = detectTutorialControlMode();
+    const step1ControlTip = mode === "xbox"
+      ? `<li><strong>🎮 Xbox 搖桿操作</strong>：按 <strong>A 鍵</strong> 雙機齊發（省 5%）、<strong>X / B 鍵</strong> 單轉拉機 A／B、<strong>Y 鍵</strong> 連轉 ×5（省 10%）！</li>`
+      : mode === "mobile"
+        ? `<li><strong>📱 手機觸控操作</strong>：點擊底部大按鈕或直接點選單台「拉桿」開轉；雙機齊發 <strong>省 5%</strong>、🔥 連轉 ×5 <strong>省 10%</strong>！</li>`
+        : `<li><strong>🖥️ 鍵盤／滑鼠操作</strong>：按空白鍵（<strong>SPACE</strong>）或點擊「雙機齊發」享 <strong>95 折（省 5%）</strong>；「🔥 連轉 ×5」享 <strong>9 折（省 10%）</strong>！</li>`;
+
+    const step2ControlTip = mode === "xbox"
+      ? `<li>可用搖桿 <strong>LB / RB（或左右鍵）</strong> 快速加減注，按 <strong>LT / 上鍵</strong> 套用動態上限，按 <strong>RT / 下鍵</strong> 切換 5 種押注模式！</li>`
+      : `<li>可用 <strong>− 減注</strong>、<strong>+ 加注</strong> 或 <strong>動態上限</strong> 快速調整金額，也可直接點選機台內的 <strong>ALL IN</strong> 或切換 5 種押注模式。</li>`;
+
+    const step5ControlTip = mode === "xbox"
+      ? `
+        <li><strong>🎮 Xbox 搖桿專屬提示</strong>：支援雙馬達停軸／中獎震動；按 <strong>View 鍵</strong> 快速靜音、<strong>Menu 鍵</strong> 開關選單、<strong>B 鍵</strong> 關閉彈窗（在本教學中按 <strong>左右鍵</strong> 可翻頁、按 <strong>A 鍵</strong> 下一步）。</li>
+        <li><strong>⚙️ 設定與選項</strong>：可在選單內開啟／關閉遊戲音效與手把震動回饋。</li>
       `
-    },
-    {
-      title: "2. 動態押注上限與押注模式",
-      html: `
-        <p>為了平衡高風險與高報酬，單台最大押注會依照目前總餘額<strong>動態調整</strong>（每台最高為可用額度的 25%）。</p>
-        <ul>
-          <li>可用 <strong>− 減注</strong>、<strong>+ 加注</strong> 或 <strong>動態上限</strong> 快速調整金額，也能直接點選機台內的 <strong>ALL IN</strong>。</li>
-          <li>總控台提供 5 種押注模式（一般／強制最高押注／第一台 ALL IN／第二台 ALL IN／雙台 ALL IN）與 AUTO 自動轉。</li>
-        </ul>
-      `
-    },
-    {
-      title: "3. 核心大獎符號（🇹🇼、7️⃣、🀄）",
-      html: `
-        <ul>
-          <li><strong><img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /> 台灣之光</strong>：1 顆中該台 GRAND、2 顆分開中 GRAND+10%、<strong>2 顆相連直奪全場 ULTRA GRAND JACKPOT</strong>、3 顆再加送 GRAND 50%！</li>
-          <li><strong>7️⃣ 幸運 7</strong>：5 連以上觸發該台 GRAND JACKPOT；若同輪重複觸發 JACKPOT，首個領完整獎池、其餘補發初始獎池。</li>
-          <li><strong>🀄 紅中</strong>：出現即贈送大紅包（至少 1,000 點或當前動態押注上限）。</li>
-        </ul>
-      `
-    },
-    {
-      title: "4. 風險符號與避險策略（💣、🎱）",
-      html: `
-        <ul>
-          <li><strong>💣 炸彈</strong>：餘額越高炸彈出現率會漸增（最高 50%）；3 連以上會扣除<strong>當輪獲得的獎金</strong>，但<strong>絕不倒扣你的本金</strong>。</li>
-          <li><strong>🎱 黑八</strong>：出現 1 顆會讓該台當輪獎金歸零；出現 <strong>2 顆分開</strong> 會留下最後 <strong>1 元</strong>；若 <strong>2 顆相連</strong> 則直接判定遊戲結束！</li>
-        </ul>
-      `
-    },
-    {
-      title: "5. 全球排行榜、設定與搖桿支援",
-      html: `
-        <ul>
-          <li><strong>🏆 全球排行榜</strong>：隨時可於右上角 <strong>☰ 選單</strong> 查看 TOP 10；正常遊玩結算時可輸入暱稱（自動加上 <code>#XXXX</code>）上傳搶榜（資料庫保留前 30 名）。</li>
-          <li><strong>⚙️ 設定與選項</strong>：可在選單內開啟／關閉遊戲音效（靜音）、手機震動與 Xbox 手把雙馬達震動。</li>
-          <li><strong>🎮 支援 Xbox 搖桿</strong>：接上藍牙或 USB 搖桿即可直接用 <strong>A / B / X / Y</strong> 與方向鍵遊玩！</li>
-        </ul>
-      `
-    }
-  ];
+      : mode === "mobile"
+        ? `
+          <li><strong>📱 手機版專屬提示</strong>：頂部可點擊 <strong>⛶ 全螢幕</strong>，橫放手機支援雙機並排；選單內可透過 <strong>⚙️ 設定與選項</strong> 開關音效與手機震動回饋。</li>
+          <li><strong>🔑 手機操作提示</strong>：選單內亦有手機專屬功能可隨時開啟使用。</li>
+        `
+        : `
+          <li><strong>⚙️ 設定與選項</strong>：可在選單內開啟／關閉遊戲音效（靜音）；亦可隨時插上或藍牙配對 Xbox 搖桿自動切換成手把模式！</li>
+        `;
+
+    return [
+      {
+        title: "1. 雙機 16×16 盤面與基礎玩法",
+        html: `
+          <p>每次開局擁有 <strong>2,000 點</strong>，畫面上方為共用 <strong>ULTRA GRAND JACKPOT</strong>，下方兩台拉霸機（A／B）可獨立或同時轉動。</p>
+          <ul>
+            <li>每台皆為 16×16 超大盤面，<strong>橫列、直行、左右斜線</strong>出現連續 3 顆以上相同符號即可兌獎（預設上限 8 連）。</li>
+            ${step1ControlTip}
+          </ul>
+        `
+      },
+      {
+        title: "2. 動態押注上限與押注模式",
+        html: `
+          <p>為了平衡高風險與高報酬，單台最大押注會依照目前總餘額<strong>動態調整</strong>（每台最高為可用額度的 25%）。</p>
+          <ul>
+            ${step2ControlTip}
+            <li>總控台與各機台皆支援 <strong>AUTO 自動轉</strong>，放手也能自動累積轉動！</li>
+          </ul>
+        `
+      },
+      {
+        title: "3. 核心大獎符號（🇹🇼、7️⃣、🀄）",
+        html: `
+          <ul>
+            <li><strong><img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /> 台灣之光</strong>：1 顆中該台 GRAND、2 顆分開中 GRAND+10%、<strong>2 顆相連直奪全場 ULTRA GRAND JACKPOT</strong>、3 顆再加送 GRAND 50%！</li>
+            <li><strong>7️⃣ 幸運 7</strong>：5 連以上觸發該台 GRAND JACKPOT；若同輪重複觸發 JACKPOT，首個領完整獎池、其餘補發初始獎池。</li>
+            <li><strong>🀄 紅中</strong>：出現即贈送大紅包（至少 1,000 點或當前動態押注上限）。</li>
+          </ul>
+        `
+      },
+      {
+        title: "4. 風險符號與避險策略（💣、🎱）",
+        html: `
+          <ul>
+            <li><strong>💣 炸彈</strong>：餘額越高炸彈出現率會漸增（最高 50%）；3 連以上會扣除<strong>當輪獲得的獎金</strong>，但<strong>絕不倒扣你的本金</strong>。</li>
+            <li><strong>🎱 黑八</strong>：出現 1 顆會讓該台當輪獎金歸零；出現 <strong>2 顆分開</strong> 會留下最後 <strong>1 元</strong>；若 <strong>2 顆相連</strong> 則直接判定遊戲結束！</li>
+          </ul>
+        `
+      },
+      {
+        title: "5. 全球排行榜與目前裝置操作",
+        html: `
+          <ul>
+            <li><strong>🏆 全球排行榜</strong>：隨時可於右上角 <strong>☰ 選單</strong> 查看 TOP 10；正常遊玩結算時可輸入暱稱（自動加上 <code>#XXXX</code>）上傳搶榜（資料庫保留前 30 名）。</li>
+            ${step5ControlTip}
+          </ul>
+        `
+      }
+    ];
+  }
 
   let tutorialStepIndex = 0;
 
   function renderTutorialStep() {
-    const step = TUTORIAL_STEPS[tutorialStepIndex];
-    const total = TUTORIAL_STEPS.length;
+    const mode = detectTutorialControlMode();
+    const steps = getTutorialSteps();
+    const step = steps[tutorialStepIndex];
+    const total = steps.length;
     tutorialStepBadge.textContent = `步驟 ${tutorialStepIndex + 1} / ${total}`;
+    if (tutorialDeviceBadge) {
+      tutorialDeviceBadge.textContent = mode === "xbox"
+        ? "🎮 偵測：Xbox 搖桿模式"
+        : mode === "mobile"
+          ? "📱 偵測：手機觸控模式"
+          : "🖥️ 偵測：電腦模式";
+    }
     tutorialBody.innerHTML = `<h3>${step.title}</h3>${step.html}`;
-    tutorialDots.innerHTML = TUTORIAL_STEPS.map((_, idx) =>
+    tutorialDots.innerHTML = steps.map((_, idx) =>
       `<span class="tutorial-dot${idx === tutorialStepIndex ? " active" : ""}"></span>`
     ).join("");
     tutorialPrevBtn.disabled = tutorialStepIndex === 0;
-    tutorialNextBtn.textContent = tutorialStepIndex === total - 1 ? "✅ 我學會了" : "下一步 ➡️";
+    tutorialNextBtn.textContent = tutorialStepIndex === total - 1 ? "✅ 我學會了（開始遊玩）" : "下一步 ➡️";
   }
 
-  function openTutorialModal(startIndex = 0) {
+  function openTutorialModal(startIndex = 0, { enterGame = false } = {}) {
     closeMenu();
-    tutorialStepIndex = Math.max(0, Math.min(TUTORIAL_STEPS.length - 1, startIndex));
+    if (enterGame && !startScreen.hidden) {
+      startScreen.hidden = true;
+    }
+    tutorialStepIndex = Math.max(0, Math.min(4, startIndex));
     renderTutorialStep();
     tutorialModal.hidden = false;
   }
 
   if (startTutorialBtn) {
-    startTutorialBtn.addEventListener("click", () => openTutorialModal(0));
+    startTutorialBtn.addEventListener("click", () => openTutorialModal(0, { enterGame: true }));
   }
   if (menuTutorialBtn) {
-    menuTutorialBtn.addEventListener("click", () => openTutorialModal(0));
+    menuTutorialBtn.addEventListener("click", () => openTutorialModal(0, { enterGame: false }));
   }
   if (closeTutorialBtn) {
     closeTutorialBtn.addEventListener("click", () => {
@@ -3168,7 +3218,7 @@
   }
   if (tutorialNextBtn) {
     tutorialNextBtn.addEventListener("click", () => {
-      if (tutorialStepIndex < TUTORIAL_STEPS.length - 1) {
+      if (tutorialStepIndex < getTutorialSteps().length - 1) {
         tutorialStepIndex += 1;
         renderTutorialStep();
       } else {
@@ -3333,6 +3383,9 @@
       gamepadToggleBtn.classList.toggle("active", state.gamepadEnabled);
       gamepadToggleBtn.textContent = state.gamepadEnabled ? "🎮 搖桿控制：開" : "🎮 搖桿控制：關";
     }
+    if (!tutorialModal.hidden) {
+      renderTutorialStep();
+    }
   }
 
   function closeTopmostModalForPad() {
@@ -3350,6 +3403,13 @@
 
   function handleGamepadAction(btnIdx) {
     if (!state.gamepadEnabled) return;
+    if (!tutorialModal.hidden) {
+      if (btnIdx === 0) { tutorialNextBtn.click(); return; }
+      if (btnIdx === 1) { tutorialModal.hidden = true; return; }
+      if (btnIdx === 4 || btnIdx === 14) { tutorialPrevBtn.click(); return; }
+      if (btnIdx === 5 || btnIdx === 15) { tutorialNextBtn.click(); return; }
+      return;
+    }
     // A 鍵 (0)：處理 Overlay 主按鈕或雙機齊發
     if (btnIdx === 0) {
       if (!startScreen.hidden) { startGameBtn.click(); return; }
