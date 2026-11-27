@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.049"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.050"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -34,8 +34,69 @@
 
   const TW_FLAG_HTML = `<img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" />`;
 
+  const EMOJI_SVG_ENTRIES = [
+    ["7️⃣", "sym-seven", true],
+    ["💎", "sym-diamond", true],
+    ["🔔", "sym-bell", true],
+    ["🍀", "sym-clover", true],
+    ["⭐", "sym-star", true],
+    ["🍒", "sym-cherry", true],
+    ["🍋", "sym-lemon", true],
+    ["💣", "sym-bomb", true],
+    ["🎱", "sym-eightball", true],
+    ["🀄", "sym-mahjong", true],
+    ["🎰", "ico-slot", false],
+    ["🏆", "menu-ico-leaderboard", false],
+    ["🎉", "ico-party", false],
+    ["👑", "ico-crown", false],
+    ["✨", "ico-sparkle", false],
+    ["🔥", "ico-flame", false],
+    ["🎮", "ico-gamepad", false],
+    ["🕹️", "ico-joystick", false],
+    ["📱", "ico-mobile", false],
+    ["🖥️", "ico-desktop", false],
+    ["📖", "menu-ico-tutorial", false],
+    ["⚠️", "ico-warn", false],
+    ["✅", "ico-check", false],
+    ["❌", "ico-cross", false],
+    ["🔒", "menu-ico-lock", false],
+    ["🔄", "menu-ico-restart", false],
+    ["🗑️", "ico-trash", false],
+    ["✏️", "ico-edit", false],
+    ["➕", "ico-plus", false],
+    ["📥", "ico-download", false],
+    ["🚪", "ico-logout", false],
+    ["🛠️", "ico-wrench", false],
+    ["♾️", "ico-infinity", false],
+    ["⚡", "ico-bolt", false],
+    ["🛡️", "ico-shield", false],
+    ["🧹", "ico-broom", false],
+    ["⚙️", "menu-ico-settings", false],
+    ["🔑", "menu-ico-key", false],
+    ["📜", "menu-ico-changelog", false],
+    ["🏠", "menu-ico-home", false],
+    ["📸", "ico-camera", false],
+    ["📤", "ico-share", false],
+    ["🧵", "ico-thread", false],
+    ["🔊", "ico-sound-on", false],
+    ["🔇", "ico-sound-off", false],
+    ["🕊️", "ico-dove", false],
+    ["📳", "ico-vibrate", false],
+    ["🌌", "ico-sparkle", false],
+    ["🎲", "ico-sparkle", false]
+  ];
+
   function formatTwFlags(text) {
-    return String(text).replaceAll("🇹🇼", TW_FLAG_HTML);
+    let out = String(text);
+    for (const [emoji, id, isSym] of EMOJI_SVG_ENTRIES) {
+      if (out.includes(emoji)) {
+        const html = isSym
+          ? `<svg class="inline-sym-svg" viewBox="0 0 64 64" aria-hidden="true"><use href="#${id}"/></svg>`
+          : `<svg class="ui-inline-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#${id}"/></svg>`;
+        out = out.replaceAll(emoji, html);
+      }
+    }
+    return out.replaceAll("🇹🇼", TW_FLAG_HTML);
   }
 
   function renderSymbolIcon(sym) {
@@ -824,9 +885,9 @@
     section.className = "cabinet";
     section.innerHTML = `
       <div class="cabinet-head">
-        <span class="cabinet-title">${title}</span>
+        <span class="cabinet-title">${formatTwFlags(title)}</span>
         <div class="cabinet-actions">
-          <span class="machine-jackpot" title="本台獨立 GRAND JACKPOT">🏆 ${initialJackpot.toLocaleString()}</span>
+          <span class="machine-jackpot" title="本台獨立 GRAND JACKPOT">${formatTwFlags(`🏆 ${initialJackpot.toLocaleString()}`)}</span>
           <button class="mini-spin-btn" type="button">單台轉動</button>
           <button class="mini-allin-btn" type="button" title="將目前全部本金單押此台">ALL IN</button>
         </div>
@@ -893,7 +954,7 @@
       currentCols: Array.from({ length: GRID_COLS }, () => createRandomCol()),
 
       updateJackpotUI() {
-        jackpotBadgeEl.textContent = `🏆 ${machine.jackpot.toLocaleString()}`;
+        jackpotBadgeEl.innerHTML = formatTwFlags(`🏆 ${machine.jackpot.toLocaleString()}`);
       },
 
       setStatus(msg, mode = "normal") {
@@ -1252,10 +1313,10 @@
     li.className = `history-item${cls}`;
     const deltaText = netDelta >= 0 ? `+${netDelta.toLocaleString()}` : `${(netDelta - totalBet).toLocaleString()}`;
 
-    li.innerHTML = `
+    li.innerHTML = formatTwFlags(`
       <span>#${state.spinCount} &nbsp; ${isJackpot ? "🎉 " : ""}${label}</span>
       <strong>${deltaText}</strong>
-    `;
+    `);
     historyListEl.prepend(li);
 
     while (historyListEl.children.length > 20) {
@@ -1373,6 +1434,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.050", time: "2026-11-27 19:53", desc: "全站所有可見圖示（按鈕、彈窗、機台狀態、歷史紀錄與符號說明）全面升級為統一風格放大向量 SVG。" },
     { ver: "v26.01.049", time: "2026-11-27 19:46", desc: "將開始畫面、規則圖示與排行榜前三名獎牌全面升級為高清向量 SVG。" },
     { ver: "v26.01.048", time: "2026-11-27 19:43", desc: "將設定與選項彈窗圖示（含手機震動開關）全面升級為大型高清向量 SVG。" },
     { ver: "v26.01.047", time: "2026-11-27 19:36", desc: "將右上角選單圖示全面升級為高清放大向量 SVG 圖示。" },
@@ -1492,17 +1554,17 @@
     `);
 
     devFastSpinBtn.classList.toggle("active", state.devFastSpin);
-    devFastSpinBtn.textContent = state.devFastSpin ? "⚡ 極速轉輪：開" : "⚡ 極速轉輪：關";
+    devFastSpinBtn.innerHTML = formatTwFlags(state.devFastSpin ? "⚡ 極速轉輪：開" : "⚡ 極速轉輪：關");
     devGodModeBtn.classList.toggle("active", state.devGodMode);
-    devGodModeBtn.textContent = state.devGodMode ? "🛡️ 防黑八護盾：開" : "🛡️ 防黑八護盾：關";
+    devGodModeBtn.innerHTML = formatTwFlags(state.devGodMode ? "🛡️ 防黑八護盾：開" : "🛡️ 防黑八護盾：關");
     devBombShieldBtn.classList.toggle("active", state.devBombShield);
-    devBombShieldBtn.textContent = state.devBombShield ? "🛡️ 炸彈護盾：開" : "🛡️ 炸彈護盾：關";
+    devBombShieldBtn.innerHTML = formatTwFlags(state.devBombShield ? "🛡️ 炸彈護盾：開" : "🛡️ 炸彈護盾：關");
     devNoZeroEndBtn.classList.toggle("active", state.devNoZeroEnd);
-    devNoZeroEndBtn.textContent = state.devNoZeroEnd ? "♾️ 0元不結束：開" : "♾️ 0元不結束：關";
+    devNoZeroEndBtn.innerHTML = formatTwFlags(state.devNoZeroEnd ? "♾️ 0元不結束：開" : "♾️ 0元不結束：關");
     devMobileBigBtn.classList.toggle("active", state.devMobileBigBtn);
-    devMobileBigBtn.textContent = state.devMobileBigBtn ? "🖐️ 單手大按鈕：開" : "🖐️ 單手大按鈕：關";
+    devMobileBigBtn.innerHTML = formatTwFlags(state.devMobileBigBtn ? "🖐️ 單手大按鈕：開" : "🖐️ 單手大按鈕：關");
     devMobileCompactBtn.classList.toggle("active", state.devMobileCompact);
-    devMobileCompactBtn.textContent = state.devMobileCompact ? "📐 緊湊盤面：開" : "📐 緊湊盤面：關";
+    devMobileCompactBtn.innerHTML = formatTwFlags(state.devMobileCompact ? "📐 緊湊盤面：開" : "📐 緊湊盤面：關");
     document.body.classList.toggle("mobile-big-controls", state.devMobileBigBtn);
     document.body.classList.toggle("mobile-compact-grid", state.devMobileCompact);
   }
@@ -1601,7 +1663,7 @@
       const baseText = instantReason || `本局共進行 ${state.spinCount} 輪轉動，餘額已歸零。`;
       const blockedRecord = isTestModeActive();
       if (blockedRecord) {
-        gameOverStats.innerHTML = `${baseText}<br>⚠️ <strong>測試／開發者模式已啟用：本局成績不列入紀錄，且無法分享。</strong>`;
+        gameOverStats.innerHTML = formatTwFlags(`${baseText}<br>⚠️ <strong>測試／開發者模式已啟用：本局成績不列入紀錄，且無法分享。</strong>`);
       } else {
         gameOverStats.innerHTML = `${baseText}<br>曾經賺過的最高餘額：<strong>${state.peakCredits.toLocaleString()}</strong> 點｜累計總贏分：<strong>${state.totalGrossWon.toLocaleString()}</strong> 點`;
       }
@@ -1831,8 +1893,8 @@
             </div>
             <span class="leaderboard-score">${Number(row.score || 0).toLocaleString()}</span>
             <div class="admin-row-actions">
-              <button class="ctrl-btn admin-mini-btn" type="button" data-admin-edit="${row.id}">✏️</button>
-              <button class="ctrl-btn admin-mini-btn danger" type="button" data-admin-del="${row.id}">🗑️</button>
+              <button class="ctrl-btn admin-mini-btn" type="button" data-admin-edit="${row.id}"><svg class="ui-svg-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-edit"/></svg></button>
+              <button class="ctrl-btn admin-mini-btn danger" type="button" data-admin-del="${row.id}"><svg class="ui-svg-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-trash"/></svg></button>
             </div>
           </div>
         `;
@@ -3188,18 +3250,20 @@
     const total = steps.length;
     tutorialStepBadge.textContent = `步驟 ${tutorialStepIndex + 1} / ${total}`;
     if (tutorialDeviceBadge) {
-      tutorialDeviceBadge.textContent = mode === "xbox"
+      tutorialDeviceBadge.innerHTML = formatTwFlags(mode === "xbox"
         ? "🎮 偵測：Xbox 搖桿模式"
         : mode === "mobile"
           ? "📱 偵測：手機觸控模式"
-          : "🖥️ 偵測：電腦模式";
+          : "🖥️ 偵測：電腦模式");
     }
-    tutorialBody.innerHTML = `<h3>${step.title}</h3>${step.html}`;
+    tutorialBody.innerHTML = formatTwFlags(`<h3>${step.title}</h3>${step.html}`);
     tutorialDots.innerHTML = steps.map((_, idx) =>
       `<span class="tutorial-dot${idx === tutorialStepIndex ? " active" : ""}"></span>`
     ).join("");
     tutorialPrevBtn.disabled = tutorialStepIndex === 0;
-    tutorialNextBtn.textContent = tutorialStepIndex === total - 1 ? "✅ 我學會了（開始遊玩）" : "下一步 ➡️";
+    tutorialNextBtn.innerHTML = tutorialStepIndex === total - 1
+      ? `<svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-check"/></svg><span>我學會了（開始遊玩）</span>`
+      : `<span>下一步</span><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-arrow-right"/></svg>`;
   }
 
   function openTutorialModal(startIndex = 0, { enterGame = false } = {}) {
@@ -3390,9 +3454,7 @@
     state.gamepadConnected = pads.length > 0;
     if (gamepadStatusBtn) {
       gamepadStatusBtn.classList.toggle("connected", state.gamepadConnected && state.gamepadEnabled);
-      gamepadStatusBtn.textContent = state.gamepadConnected
-        ? (state.gamepadEnabled ? "🎮 Xbox 已連線" : "🎮 搖桿已暫停")
-        : "🎮 搖桿";
+      gamepadStatusBtn.innerHTML = `<svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-gamepad"/></svg><span>${state.gamepadConnected ? (state.gamepadEnabled ? "Xbox 已連線" : "搖桿已暫停") : "搖桿"}</span>`;
     }
     if (gamepadModalStatus) {
       gamepadModalStatus.textContent = state.gamepadConnected
@@ -3401,7 +3463,7 @@
     }
     if (gamepadToggleBtn) {
       gamepadToggleBtn.classList.toggle("active", state.gamepadEnabled);
-      gamepadToggleBtn.textContent = state.gamepadEnabled ? "🎮 搖桿控制：開" : "🎮 搖桿控制：關";
+      gamepadToggleBtn.innerHTML = `<svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-joystick"/></svg><span>${state.gamepadEnabled ? "搖桿控制：開" : "搖桿控制：關"}</span>`;
     }
     if (!tutorialModal.hidden) {
       renderTutorialStep();

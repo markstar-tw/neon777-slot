@@ -22,7 +22,7 @@
   <meta name="twitter:description" content="雙機 16×16 超大盤面、全方向連線兌獎、動態炸彈風險與三層獎池！來挑戰你的最高戰績！" />
   <meta name="twitter:image" content="https://markstar-tw.github.io/neon777-slot/main_logo.jpg" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>" />
-  <link rel="stylesheet" href="style.css?v=26.01.049" />
+  <link rel="stylesheet" href="style.css?v=26.01.050" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -268,6 +268,105 @@
       <circle cx="12" cy="14" r="6.5" fill="#d7824b" fill-opacity="0.3" stroke="#ffad73" stroke-width="2"/>
       <path d="M10.2 11.4h3.2l-1.8 2a1.6 1.6 0 1 1-1.4 2.7" fill="none" stroke="#ffad73" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
+
+    <!-- 全站通用 UI 霓虹向量圖示 (24x24) -->
+    <symbol id="ico-slot" viewBox="0 0 24 24">
+      <rect x="3" y="5" width="18" height="14" rx="3" fill="#ff3e8a" fill-opacity="0.2" stroke="#ffe17d" stroke-width="1.9"/>
+      <path d="M9 5v14M15 5v14" stroke="#2de2e6" stroke-width="1.5" opacity="0.75"/>
+      <path d="M5 10h2.2l-1.3 4M11 10h2.2l-1.3 4M17 10h2.2l-1.3 4" fill="none" stroke="#ffe17d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-menu" viewBox="0 0 24 24">
+      <path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="#2de2e6" stroke-width="2.2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-fullscreen" viewBox="0 0 24 24">
+      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="#2de2e6" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-wrench" viewBox="0 0 24 24">
+      <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4l-5.1 5.1a1.6 1.6 0 0 0 2.3 2.3l5.1-5.1a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.3-2.3z" fill="#2de2e6" fill-opacity="0.22" stroke="#2de2e6" stroke-width="1.9" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-warn" viewBox="0 0 24 24">
+      <path d="M12 3.5L2.5 20h19z" fill="#f5c542" fill-opacity="0.22" stroke="#ffe17d" stroke-width="1.9" stroke-linejoin="round"/>
+      <path d="M12 9.5v4.5M12 17h.01" stroke="#ffe17d" stroke-width="2.1" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-dove" viewBox="0 0 24 24">
+      <path d="M4 15c3.5 0 5.5-2.5 7-5.5C13 6 16 4.5 19.5 5.5c-1.5 1.8-1.5 3.5-.5 5.5-2.2.2-3.5 1.8-4.5 4.2C13 18.5 9.5 19.5 5.5 18.5 4.8 17.2 4.3 16 4 15z" fill="#2de2e6" fill-opacity="0.2" stroke="#b8f7ff" stroke-width="1.8" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-check" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" fill="#38f29b" fill-opacity="0.2" stroke="#38f29b" stroke-width="1.9"/>
+      <path d="M8 12.2l2.8 2.8L16.5 9" fill="none" stroke="#38f29b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-cross" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" fill="#ff3e8a" fill-opacity="0.22" stroke="#ff7a90" stroke-width="1.9"/>
+      <path d="M9 9l6 6M15 9l-6 6" fill="none" stroke="#ff7a90" stroke-width="2.2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-crown" viewBox="0 0 24 24">
+      <path d="M3.5 18L5 7l4.5 4.5L12 5l2.5 6.5L19 7l1.5 11z" fill="#f5c542" fill-opacity="0.32" stroke="#ffe17d" stroke-width="1.9" stroke-linejoin="round"/>
+      <path d="M4.5 20h15" stroke="#ffe17d" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-party" viewBox="0 0 24 24">
+      <path d="M4 20l4.5-11 6.5 6.5z" fill="#ff3e8a" fill-opacity="0.28" stroke="#ffe17d" stroke-width="1.9" stroke-linejoin="round"/>
+      <path d="M13 6l1-2M17.5 8.5l2-1M17 13l2 .5" stroke="#2de2e6" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-sparkle" viewBox="0 0 24 24">
+      <path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3L3.5 11l6.3-2.2z" fill="#ffe17d" fill-opacity="0.3" stroke="#ffe17d" stroke-width="1.8" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-camera" viewBox="0 0 24 24">
+      <rect x="3" y="6.5" width="18" height="13" rx="2.5" fill="#2de2e6" fill-opacity="0.18" stroke="#2de2e6" stroke-width="1.9"/>
+      <path d="M8 6.5l1.5-2.5h5L16 6.5" stroke="#2de2e6" stroke-width="1.9" stroke-linejoin="round"/>
+      <circle cx="12" cy="13" r="3.2" fill="#ffe17d" fill-opacity="0.25" stroke="#ffe17d" stroke-width="1.8"/>
+    </symbol>
+    <symbol id="ico-share" viewBox="0 0 24 24">
+      <path d="M12 15V4M8 8l4-4 4 4" fill="none" stroke="#2de2e6" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5 14v5a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-5" fill="none" stroke="#b8c4e8" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-x" viewBox="0 0 24 24">
+      <path d="M4.5 4l6.2 8.2L4.2 20h2.4l5.2-6 4.4 6H20l-6.6-8.7L19.4 4h-2.4l-4.8 5.5L8 4z" fill="#f4f6ff"/>
+    </symbol>
+    <symbol id="ico-thread" viewBox="0 0 24 24">
+      <path d="M16.8 11.4c-.4-2.5-2.1-3.9-4.6-3.9-2.2 0-3.8 1.2-4.2 3.1l2 .5c.3-1 1.1-1.6 2.2-1.6 1.3 0 2.2.7 2.4 2-.9-.3-1.8-.4-2.8-.3-2.4.2-3.9 1.5-3.9 3.4 0 1.9 1.5 3.3 3.7 3.3 2.5 0 4.3-1.5 4.6-4.1.9.6 1.4 1.6 1.4 2.8 0 2.6-2.2 4.4-5.4 4.4-3.8 0-6.2-2.6-6.2-6.7S8.4 4.5 12.2 4.5c2.9 0 5 1.4 5.7 3.8l1.9-.6C18.9 4.5 16 2.5 12.2 2.5 7.2 2.5 4 6 4 11.2c0 5.3 3.2 8.8 8.2 8.8 4.4 0 7.4-2.6 7.4-6.4 0-1.9-.8-3.3-2.8-4.2z" fill="#2de2e6"/>
+    </symbol>
+    <symbol id="ico-mobile" viewBox="0 0 24 24">
+      <rect x="6.5" y="2.5" width="11" height="19" rx="2.5" fill="#2de2e6" fill-opacity="0.18" stroke="#2de2e6" stroke-width="1.9"/>
+      <circle cx="12" cy="18" r="1" fill="#ffe17d"/>
+    </symbol>
+    <symbol id="ico-desktop" viewBox="0 0 24 24">
+      <rect x="3" y="4" width="18" height="12" rx="2" fill="#2de2e6" fill-opacity="0.18" stroke="#2de2e6" stroke-width="1.9"/>
+      <path d="M9 20h6M12 16v4" stroke="#b8c4e8" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-infinity" viewBox="0 0 24 24">
+      <path d="M18.2 8.5a3.5 3.5 0 0 0-5 0L12 9.7l-1.2-1.2a3.5 3.5 0 1 0 0 5l1.2-1.2 1.2 1.2a3.5 3.5 0 1 0 5-5z" fill="none" stroke="#2de2e6" stroke-width="2.1" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-shield" viewBox="0 0 24 24">
+      <path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.4-7.5 9.5-4.3-1.1-7.5-4.9-7.5-9.5V6z" fill="#38f29b" fill-opacity="0.2" stroke="#38f29b" stroke-width="1.9" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-bolt" viewBox="0 0 24 24">
+      <polygon points="13,2.5 5.5,13.5 11.5,13.5 10.5,21.5 18.5,10.5 12.5,10.5" fill="#ffe17d" fill-opacity="0.32" stroke="#ffe17d" stroke-width="1.8" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-plus" viewBox="0 0 24 24">
+      <path d="M12 5v14M5 12h14" stroke="#38f29b" stroke-width="2.3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-download" viewBox="0 0 24 24">
+      <path d="M12 4v11M8 11l4 4 4-4" fill="none" stroke="#2de2e6" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5 18h14" stroke="#ffe17d" stroke-width="2.1" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-edit" viewBox="0 0 24 24">
+      <path d="M4 20h4l10.5-10.5a2 2 0 0 0-2.8-2.8L5.2 17.2z" fill="#2de2e6" fill-opacity="0.2" stroke="#2de2e6" stroke-width="1.9" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-trash" viewBox="0 0 24 24">
+      <path d="M4.5 7h15M9.5 4h5M7 7l1 13h8l1-13" fill="none" stroke="#ff7a90" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-logout" viewBox="0 0 24 24">
+      <path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10M15 8l4 4-4 4M9 12h10" fill="none" stroke="#ff7a90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-broom" viewBox="0 0 24 24">
+      <path d="M15 4l-4 7M7 13l7 4-3 3.5-7-4z" fill="#ffe17d" fill-opacity="0.25" stroke="#ffe17d" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-arrow-left" viewBox="0 0 24 24">
+      <path d="M15 6l-6 6 6 6" fill="none" stroke="#b8c4e8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ico-arrow-right" viewBox="0 0 24 24">
+      <path d="M9 6l6 6-6 6" fill="none" stroke="#ffe17d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
   </svg>
   <div class="app-shell">
     <header class="top-bar">
@@ -276,18 +375,18 @@
         <h1>街霸拉機NEON777</h1>
       </div>
       <div class="top-actions">
-        <button id="mobileFullscreenBtn" class="icon-btn mobile-only" type="button" aria-label="切換全螢幕">
-          ⛶ 全螢幕
+        <button id="mobileFullscreenBtn" class="icon-btn btn-with-svg mobile-only" type="button" aria-label="切換全螢幕">
+          <svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-fullscreen"/></svg><span>全螢幕</span>
         </button>
-        <button id="devPanelBtn" class="icon-btn dev-top-btn" type="button" hidden>
-          🛠️ 開發者
+        <button id="devPanelBtn" class="icon-btn btn-with-svg dev-top-btn" type="button" hidden>
+          <svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-wrench"/></svg><span>開發者</span>
         </button>
-        <button id="gamepadStatusBtn" class="icon-btn gamepad-btn" type="button" title="Xbox / 遊戲搖桿相容模式與按鍵說明">
-          🎮 搖桿
+        <button id="gamepadStatusBtn" class="icon-btn btn-with-svg gamepad-btn" type="button" title="Xbox / 遊戲搖桿相容模式與按鍵說明">
+          <svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-gamepad"/></svg><span>搖桿</span>
         </button>
         <div class="menu-wrap">
-          <button id="menuBtn" class="icon-btn menu-trigger" type="button" aria-expanded="false" aria-controls="gameMenu">
-            ☰ 選單
+          <button id="menuBtn" class="icon-btn btn-with-svg menu-trigger" type="button" aria-expanded="false" aria-controls="gameMenu">
+            <svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-menu"/></svg><span>選單</span>
           </button>
           <div id="gameMenu" class="menu-dropdown" hidden>
             <button id="menuSettleBtn" class="menu-item" type="button"><svg class="menu-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-settle"/></svg><span class="menu-item-label">結算並結束本局</span></button>
@@ -318,7 +417,7 @@
 
       <div class="meters">
         <div class="meter-box credits-box">
-          <span class="meter-label">總餘額 CREDITS（💣 <span id="bombRateLabel">9.7%</span>）</span>
+          <span class="meter-label">總餘額 CREDITS（<svg class="inline-sym-svg" viewBox="0 0 64 64" aria-label="炸彈"><use href="#sym-bomb"/></svg> <span id="bombRateLabel">9.7%</span>）</span>
           <div class="meter-value-row">
             <span id="creditsValue" class="meter-value">2,000</span>
             <div id="creditsSpendStack" class="spend-stack" aria-live="polite"></div>
@@ -345,8 +444,8 @@
         </div>
 
         <div class="spin-controls">
-          <button id="burstSpinBtn" class="ctrl-btn burst-btn" type="button" title="連續自動轉 5 輪（省 10%）">
-            🔥 連轉 ×5（省10%）
+          <button id="burstSpinBtn" class="ctrl-btn burst-btn btn-with-svg" type="button" title="連續自動轉 5 輪（省 10%）">
+            <svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-flame"/></svg><span>連轉 ×5（省10%）</span>
           </button>
           <button id="spinAllBtn" class="spin-btn" type="button">
             <span class="spin-main">雙機齊發</span>
@@ -389,15 +488,15 @@
 
     <footer class="site-footer">
       <p class="footer-brand">
-        <span id="appVersionText">v26.01.049</span> ｜
+        <span id="appVersionText">v26.01.050</span> ｜
         Made with <a href="https://antigravity.google/" target="_blank" rel="noopener noreferrer">Google Antigravity</a> ｜
         Hosted on <a href="https://github.com/markstar-tw/neon777-slot" target="_blank" rel="noopener noreferrer">GitHub</a>
       </p>
       <p class="footer-disclaimer">
-        ⚠️ 免責聲明：本遊戲純屬休閒娛樂模擬，非真實賭博，遊戲內所有點數皆無實際貨幣價值，亦不可兌換現金、實體獎品或任何有價證券，嚴禁用於任何非法用途。請理性娛樂，切勿沉迷。
+        <svg class="ui-inline-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-warn"/></svg> 免責聲明：本遊戲純屬休閒娛樂模擬，非真實賭博，遊戲內所有點數皆無實際貨幣價值，亦不可兌換現金、實體獎品或任何有價證券，嚴禁用於任何非法用途。請理性娛樂，切勿沉迷。
       </p>
       <p class="footer-disclaimer">
-        🕊️ 立場聲明：本遊戲純屬程式開發與休閒娛樂作品，無任何政治立場、政黨傾向或選舉意圖，遊戲內所有符號與圖示僅作為遊戲機制識別使用，請勿過度聯想。
+        <svg class="ui-inline-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-dove"/></svg> 立場聲明：本遊戲純屬程式開發與休閒娛樂作品，無任何政治立場、政黨傾向或選舉意圖，遊戲內所有符號與圖示僅作為遊戲機制識別使用，請勿過度聯想。
       </p>
       <p class="footer-links">
         相關資源：
@@ -410,7 +509,7 @@
   <!-- 開始畫面 Overlay -->
   <div id="startScreen" class="overlay-screen">
     <div class="overlay-card start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
-      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.049</span></span>
+      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.050</span></span>
       <h2 id="startTitle" class="overlay-title">街霸拉機NEON777</h2>
       <p class="overlay-desc">雙機 16×16 街機拉霸！橫、直、左右斜線皆可兌獎（最高 8 連），各台獨立累積 GRAND JACKPOT，尋找極稀有 <img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /> 與 <svg class="inline-sym-svg" viewBox="0 0 64 64" aria-label="紅中"><use href="#sym-mahjong"/></svg>！</p>
       <ul class="overlay-rules">
@@ -449,15 +548,15 @@
       <h2 id="gameOverTitle" class="overlay-title danger">挑戰失敗！點數歸零</h2>
       <p id="gameOverStats" class="overlay-desc">本局共進行 0 輪轉動，餘額已用盡。</p>
       <div class="overlay-actions">
-        <button id="gameOverShareXBtn" class="ctrl-btn" type="button">𝕏 分享到 X</button>
-        <button id="gameOverShareThreadsBtn" class="ctrl-btn" type="button">🧵 分享到 Threads</button>
-        <button id="gameOverShareOtherBtn" class="ctrl-btn toggle" type="button">📤 其他分享</button>
+        <button id="gameOverShareXBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-x"/></svg><span>分享到 X</span></button>
+        <button id="gameOverShareThreadsBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-thread"/></svg><span>分享到 Threads</span></button>
+        <button id="gameOverShareOtherBtn" class="ctrl-btn toggle btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-share"/></svg><span>其他分享</span></button>
         <button id="gameOverRestartBtn" class="spin-btn overlay-primary-btn" type="button">
           <span class="spin-main">重新開始</span>
           <span class="spin-sub">RESET TO 2,000</span>
         </button>
-        <button id="gameOverDisableDevRestartBtn" class="ctrl-btn" type="button" hidden>🔒 下一局關閉開發者模式</button>
-        <button id="gameOverHomeBtn" class="ctrl-btn" type="button">🏠 回到開始畫面</button>
+        <button id="gameOverDisableDevRestartBtn" class="ctrl-btn btn-with-svg" type="button" hidden><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-lock"/></svg><span>下一局關閉開發者模式</span></button>
+        <button id="gameOverHomeBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-home"/></svg><span>回到開始畫面</span></button>
       </div>
     </div>
   </div>
@@ -472,29 +571,29 @@
         <label class="leaderboard-upload-label" for="leaderboardNameInput">上傳本局分數至全球排行榜（最多 15 字，自動加 #XXXX）</label>
         <div class="leaderboard-form-row">
           <input id="leaderboardNameInput" class="mobile-code-input leaderboard-input" type="text" maxlength="15" placeholder="輸入玩家暱稱（最多 15 字）..." autocomplete="off" />
-          <button id="leaderboardSubmitBtn" class="ctrl-btn burst-btn" type="button">🏆 上傳分數</button>
+          <button id="leaderboardSubmitBtn" class="ctrl-btn burst-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-leaderboard"/></svg><span>上傳分數</span></button>
         </div>
         <p id="leaderboardSubmitFeedback" class="leaderboard-feedback"></p>
       </div>
       <div class="leaderboard-box" aria-label="全球排行榜">
         <div class="leaderboard-header">
-          <span class="leaderboard-title">🏆 全球排行榜 TOP 10</span>
-          <button id="settleLeaderboardRefreshBtn" class="ctrl-btn leaderboard-refresh-btn" type="button">🔄 刷新</button>
+          <span class="leaderboard-title title-with-svg"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-leaderboard"/></svg><span>全球排行榜 TOP 10</span></span>
+          <button id="settleLeaderboardRefreshBtn" class="ctrl-btn leaderboard-refresh-btn btn-with-svg" type="button"><svg class="ui-svg-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-restart"/></svg><span>刷新</span></button>
         </div>
         <div id="settleLeaderboardList" class="leaderboard-list">
           <div class="leaderboard-empty">排行榜載入中...</div>
         </div>
       </div>
       <div class="overlay-actions">
-        <button id="downloadSettleImgBtn" class="ctrl-btn burst-btn" type="button">📸 下載結算圖片</button>
-        <button id="shareXBtn" class="ctrl-btn" type="button">𝕏 分享到 X</button>
-        <button id="shareThreadsBtn" class="ctrl-btn" type="button">🧵 分享到 Threads</button>
-        <button id="shareSettleBtn" class="ctrl-btn toggle" type="button">📤 其他分享</button>
+        <button id="downloadSettleImgBtn" class="ctrl-btn burst-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-camera"/></svg><span>下載結算圖片</span></button>
+        <button id="shareXBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-x"/></svg><span>分享到 X</span></button>
+        <button id="shareThreadsBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-thread"/></svg><span>分享到 Threads</span></button>
+        <button id="shareSettleBtn" class="ctrl-btn toggle btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-share"/></svg><span>其他分享</span></button>
         <button id="settleRestartBtn" class="spin-btn overlay-primary-btn" type="button">
           <span class="spin-main">重新開始</span>
           <span class="spin-sub">NEW GAME • 2,000</span>
         </button>
-        <button id="settleDisableDevRestartBtn" class="ctrl-btn" type="button" hidden>🔒 下一局關閉開發者模式</button>
+        <button id="settleDisableDevRestartBtn" class="ctrl-btn btn-with-svg" type="button" hidden><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-lock"/></svg><span>下一局關閉開發者模式</span></button>
       </div>
     </div>
   </div>
@@ -506,7 +605,7 @@
         <h2 id="paytableTitle">賠率表 PAYTABLE</h2>
         <button id="closePaytableBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
       </div>
-      <p class="modal-note">每台皆為 16×16 盤面，<strong>橫列、直行、左右斜線</strong>出現連續 3 顆以上相同符號即可兌獎（最高 8 連）；出現 3 連以上 💣 炸彈會扣獎金（不扣本金）；出現 1 顆 <strong>🎱 黑八</strong> 失去該台獎金（獎池與餘額保留），出現 2 顆 <strong>🎱 分開</strong> 留下最後 1 元，若 <strong>2 顆 🎱 相連</strong> 則直接遊戲失敗；稀有 <strong>🀄 紅中</strong> 依當前押注上限送大紅包（最低 1,000）；<strong><img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /></strong> 1 顆中該台 GRAND、2 顆分開中 GRAND+10%、2 顆相連直奪 <strong>ULTRA GRAND JACKPOT</strong>，3 顆再加送 GRAND 的 50%！</p>
+      <p class="modal-note">每台皆為 16×16 盤面，<strong>橫列、直行、左右斜線</strong>出現連續 3 顆以上相同符號即可兌獎（最高 8 連）；出現 3 連以上 <svg class="inline-sym-svg" viewBox="0 0 64 64" aria-label="炸彈"><use href="#sym-bomb"/></svg> 炸彈會扣獎金（不扣本金）；出現 1 顆 <strong><svg class="inline-sym-svg" viewBox="0 0 64 64" aria-label="黑八"><use href="#sym-eightball"/></svg> 黑八</strong> 失去該台獎金（獎池與餘額保留），出現 2 顆 <strong><svg class="inline-sym-svg" viewBox="0 0 64 64" aria-label="黑八"><use href="#sym-eightball"/></svg> 分開</strong> 留下最後 1 元，若 <strong>2 顆 <svg class="inline-sym-svg" viewBox="0 0 64 64" aria-label="黑八"><use href="#sym-eightball"/></svg> 相連</strong> 則直接遊戲失敗；稀有 <strong><svg class="inline-sym-svg" viewBox="0 0 64 64" aria-label="紅中"><use href="#sym-mahjong"/></svg> 紅中</strong> 依當前押注上限送大紅包（最低 1,000）；<strong><img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /></strong> 1 顆中該台 GRAND、2 顆分開中 GRAND+10%、2 顆相連直奪 <strong>ULTRA GRAND JACKPOT</strong>，3 顆再加送 GRAND 的 50%！</p>
       <div id="paytableBody" class="paytable-grid"></div>
     </div>
   </div>
@@ -585,7 +684,7 @@
   <div id="mobileCodeModal" class="modal-backdrop" hidden>
     <div class="modal-card mobile-code-card" role="dialog" aria-modal="true" aria-labelledby="mobileCodeTitle">
       <div class="modal-header">
-        <h2 id="mobileCodeTitle">🔑 輸入密技（手機版專用）</h2>
+        <h2 id="mobileCodeTitle" class="modal-title-with-svg"><svg class="modal-title-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-key"/></svg><span>輸入密技（手機版專用）</span></h2>
         <button id="closeMobileCodeBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
       </div>
       <p class="modal-note">請輸入暗語代碼</p>
@@ -603,7 +702,7 @@
   <div id="changelogModal" class="modal-backdrop" hidden>
     <div class="modal-card changelog-card" role="dialog" aria-modal="true" aria-labelledby="changelogTitle">
       <div class="modal-header">
-        <h2 id="changelogTitle">📜 更新日誌 CHANGELOG</h2>
+        <h2 id="changelogTitle" class="modal-title-with-svg"><svg class="modal-title-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-changelog"/></svg><span>更新日誌 CHANGELOG</span></h2>
         <button id="closeChangelogBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
       </div>
       <p class="modal-note">版本格式：年.大版本.小版本（00.00.000）</p>
@@ -615,13 +714,13 @@
   <div id="leaderboardModal" class="modal-backdrop" hidden>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="leaderboardModalTitle">
       <div class="modal-header">
-        <h2 id="leaderboardModalTitle">🏆 全球排行榜 TOP 10</h2>
+        <h2 id="leaderboardModalTitle" class="modal-title-with-svg"><svg class="modal-title-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-leaderboard"/></svg><span>全球排行榜 TOP 10</span></h2>
         <button id="closeLeaderboardModalBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
       </div>
       <div class="leaderboard-box" aria-label="全球排行榜">
         <div class="leaderboard-header">
           <span class="leaderboard-title">即時全球最高分前 10 名</span>
-          <button id="modalLeaderboardRefreshBtn" class="ctrl-btn leaderboard-refresh-btn" type="button">🔄 刷新</button>
+          <button id="modalLeaderboardRefreshBtn" class="ctrl-btn leaderboard-refresh-btn btn-with-svg" type="button"><svg class="ui-svg-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-restart"/></svg><span>刷新</span></button>
         </div>
         <div id="modalLeaderboardList" class="leaderboard-list">
           <div class="leaderboard-empty">排行榜載入中...</div>
@@ -634,7 +733,7 @@
   <div id="adminModal" class="modal-backdrop" hidden>
     <div class="modal-card admin-card" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
       <div class="modal-header">
-        <h2 id="adminModalTitle">🔐 管理員後台</h2>
+        <h2 id="adminModalTitle" class="modal-title-with-svg"><svg class="modal-title-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-lock"/></svg><span>管理員後台</span></h2>
         <button id="closeAdminModalBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
       </div>
 
@@ -642,21 +741,21 @@
         <p class="modal-note">請輸入管理員密碼以管理全球排行榜與營運數據。</p>
         <div class="leaderboard-form-row">
           <input id="adminPasswordInput" class="mobile-code-input leaderboard-input" type="password" placeholder="輸入管理員密碼..." autocomplete="off" />
-          <button id="adminLoginBtn" class="ctrl-btn burst-btn" type="button">🔓 登入後台</button>
+          <button id="adminLoginBtn" class="ctrl-btn burst-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-key"/></svg><span>登入後台</span></button>
         </div>
         <p id="adminLoginFeedback" class="leaderboard-feedback"></p>
       </div>
 
       <div id="adminDashboardView" class="admin-dashboard" hidden>
         <div class="admin-topbar">
-          <span class="admin-auth-badge">🟢 已認證管理員</span>
-          <button id="adminLogoutBtn" class="ctrl-btn" type="button">🚪 登出後台</button>
+          <span class="admin-auth-badge title-with-svg"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-check"/></svg><span>已認證管理員</span></span>
+          <button id="adminLogoutBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-logout"/></svg><span>登出後台</span></button>
         </div>
         <div id="adminSummaryBox" class="admin-summary-grid"></div>
         <div class="admin-toolbar">
-          <button id="adminRefreshBtn" class="ctrl-btn" type="button">🔄 刷新榜單</button>
-          <button id="adminAddRowBtn" class="ctrl-btn" type="button">➕ 新增紀錄</button>
-          <button id="adminExportCsvBtn" class="ctrl-btn" type="button">📥 匯出 CSV</button>
+          <button id="adminRefreshBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-restart"/></svg><span>刷新榜單</span></button>
+          <button id="adminAddRowBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-plus"/></svg><span>新增紀錄</span></button>
+          <button id="adminExportCsvBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-download"/></svg><span>匯出 CSV</span></button>
         </div>
         <p id="adminActionFeedback" class="leaderboard-feedback"></p>
         <div id="adminLeaderboardList" class="admin-list">
@@ -670,22 +769,22 @@
   <div id="gamepadModal" class="modal-backdrop" hidden>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="gamepadModalTitle">
       <div class="modal-header">
-        <h2 id="gamepadModalTitle">🎮 Xbox 搖桿相容模式</h2>
+        <h2 id="gamepadModalTitle" class="modal-title-with-svg"><svg class="modal-title-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-gamepad"/></svg><span>Xbox 搖桿相容模式</span></h2>
         <button id="closeGamepadModalBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
       </div>
       <p id="gamepadModalStatus" class="modal-note">請透過藍牙或 USB 連接 Xbox 搖桿後，按下手把任意鍵自動啟用。</p>
       <div class="paytable-grid">
         <div class="paytable-row"><span><strong>A 鍵</strong></span><span>雙機齊發 / 確認開始或重開</span></div>
         <div class="paytable-row"><span><strong>X 鍵 / B 鍵</strong></span><span>單轉拉機 A / 單轉拉機 B（或關閉彈窗）</span></div>
-        <div class="paytable-row"><span><strong>Y 鍵</strong></span><span>🔥 連轉 ×5（省 10%）</span></div>
+        <div class="paytable-row"><span><strong>Y 鍵</strong></span><span class="title-with-svg"><svg class="ui-svg-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-flame"/></svg><span>連轉 ×5（省 10%）</span></span></div>
         <div class="paytable-row"><span><strong>LB / RB（或左右鍵）</strong></span><span>− 減注 / + 加注</span></div>
         <div class="paytable-row"><span><strong>LT / 十字鍵上</strong></span><span>套用動態押注上限</span></div>
         <div class="paytable-row"><span><strong>RT / 十字鍵下</strong></span><span>切換押注模式（一般 / 最高 / ALL IN）</span></div>
         <div class="paytable-row"><span><strong>View / Menu 鍵</strong></span><span>切換音效 / 開關選單</span></div>
       </div>
       <div class="overlay-actions">
-        <button id="gamepadToggleBtn" class="ctrl-btn toggle active" type="button">🎮 搖桿控制：開</button>
-        <button id="gamepadTestRumbleBtn" class="ctrl-btn" type="button">📳 測試手把震動</button>
+        <button id="gamepadToggleBtn" class="ctrl-btn toggle active btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-joystick"/></svg><span>搖桿控制：開</span></button>
+        <button id="gamepadTestRumbleBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-vibrate"/></svg><span>測試手把震動</span></button>
       </div>
     </div>
   </div>
@@ -711,22 +810,22 @@
   <div id="tutorialModal" class="modal-backdrop" hidden>
     <div class="modal-card tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
       <div class="modal-header">
-        <h2 id="tutorialTitle">📖 新手教學模式</h2>
+        <h2 id="tutorialTitle" class="modal-title-with-svg"><svg class="modal-title-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#menu-ico-tutorial"/></svg><span>新手教學模式</span></h2>
         <button id="closeTutorialBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
       </div>
       <div class="tutorial-meta-row">
         <div id="tutorialStepBadge" class="tutorial-step-badge">步驟 1 / 5</div>
-        <div id="tutorialDeviceBadge" class="tutorial-device-badge">🖥️ 電腦模式</div>
+        <div id="tutorialDeviceBadge" class="tutorial-device-badge">電腦模式</div>
       </div>
       <div id="tutorialBody" class="tutorial-body"></div>
       <div id="tutorialDots" class="tutorial-dots" aria-hidden="true"></div>
       <div class="tutorial-actions">
-        <button id="tutorialPrevBtn" class="ctrl-btn" type="button">⬅️ 上一步</button>
-        <button id="tutorialNextBtn" class="ctrl-btn burst-btn" type="button">下一步 ➡️</button>
+        <button id="tutorialPrevBtn" class="ctrl-btn btn-with-svg" type="button"><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-arrow-left"/></svg><span>上一步</span></button>
+        <button id="tutorialNextBtn" class="ctrl-btn burst-btn btn-with-svg" type="button"><span>下一步</span><svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-arrow-right"/></svg></button>
       </div>
     </div>
   </div>
 
-  <script src="app.js?v=26.01.049"></script>
+  <script src="app.js?v=26.01.050"></script>
 </body>
 </html>
