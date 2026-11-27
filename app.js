@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.02.003"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.02.004"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -1451,6 +1451,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.02.004", time: "2026-11-27 23:11", desc: "手機全螢幕與 PWA 模式全面支援瀏海、動態島與挖孔鏡頭安全區閃避。" },
     { ver: "v26.02.003", time: "2026-11-27 23:07", desc: "調降初期炸彈出現率（約 2.1%），並強化遊戲中期的動態炸彈爬升節奏。" },
     { ver: "v26.02.002", time: "2026-11-27 23:05", desc: "修正手機直向模式押注模式按鈕超出畫面問題，改為緊湊自動換行完整顯示。" },
     { ver: "v26.02.001", time: "2026-11-27 23:02", desc: "手機直向模式將「連轉 ×5」、「雙機齊發」與模式選擇鎖定於螢幕底部，並保留底部滾動安全區，確保轉盤完整可視。" },
@@ -3384,7 +3385,8 @@
 
   function updateFullscreenLabel() {
     const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-    mobileFullscreenBtn.textContent = isFs ? "⛶ 退出全螢幕" : "⛶ 全螢幕";
+    document.body.classList.toggle("is-fullscreen", isFs);
+    mobileFullscreenBtn.innerHTML = `<svg class="ui-svg" viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-fullscreen"/></svg><span>${isFs ? "退出全螢幕" : "全螢幕"}</span>`;
   }
 
   mobileFullscreenBtn.addEventListener("click", async () => {
@@ -3395,7 +3397,11 @@
         if (document.exitFullscreen) await document.exitFullscreen();
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
       } else if (docEl.requestFullscreen) {
-        await docEl.requestFullscreen();
+        try {
+          await docEl.requestFullscreen({ navigationUI: "hide" });
+        } catch (_) {
+          await docEl.requestFullscreen();
+        }
       } else if (docEl.webkitRequestFullscreen) {
         docEl.webkitRequestFullscreen();
       } else {
