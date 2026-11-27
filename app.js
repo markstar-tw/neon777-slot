@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.039"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.040"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -1342,6 +1342,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.040", time: "2026-11-27 19:03", desc: "優化手機版觸控震動回饋觸發時機，操作手感更即時。" },
     { ver: "v26.01.039", time: "2026-11-27 18:49", desc: "介面精簡與系統體驗最佳化。" },
     { ver: "v26.01.038", time: "2026-11-27 18:45", desc: "排行榜新增玩家隨機識別碼（#XXXX）與前 30 名自動清理機制最佳化。" },
     { ver: "v26.01.037", time: "2026-11-27 18:38", desc: "系統安全性強化與後端管理維護工具更新。" },
@@ -1954,6 +1955,15 @@
     link.click();
   }
 
+  function triggerHaptic(pattern = 20) {
+    if (!state.devMobileVibrate || typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
+    try {
+      navigator.vibrate(pattern);
+    } catch (_) {
+      // 忽略部分行動瀏覽器未授權時之例外
+    }
+  }
+
   async function runSpin(targetMachines = machines, { isAllIn = false } = {}) {
     if (state.isSettled) return;
     // 依據強制押注模式自動調整目標機台與押注金額
@@ -1972,6 +1982,7 @@
 
     clampAllMachineBets();
     const isBurst = state.burstRemaining > 0;
+    triggerHaptic(isBurst ? [18, 28, 18] : 22);
     const maxForTargets = getDynamicMaxBet(machines.length);
     const machineBets = targetMachines.map((m) => {
       if (isAllIn) {
@@ -2253,8 +2264,10 @@
       state.credits = 1;
     }
 
-    if (maxWinCells > 0 && state.devMobileVibrate && navigator.vibrate) {
-      navigator.vibrate(anyJackpot || anyUltraJackpot ? [60, 40, 120] : 40);
+    if (maxWinCells > 0) {
+      triggerHaptic(anyJackpot || anyUltraJackpot ? [60, 40, 120] : 40);
+    } else if (anyInstantGameOver || anyLeaveOne) {
+      triggerHaptic([80, 40, 80]);
     }
 
     if (anyMahjong || anyUltraJackpot) {
@@ -2383,6 +2396,7 @@
     machines.forEach((m) => {
       m.bet = clampBetValue(m.bet - step);
     });
+    triggerHaptic(12);
     updateUI();
   });
 
@@ -2392,6 +2406,7 @@
     machines.forEach((m) => {
       m.bet = clampBetValue(m.bet + step);
     });
+    triggerHaptic(12);
     updateUI();
   });
 
@@ -2400,6 +2415,7 @@
     machines.forEach((m) => {
       m.bet = maxBet;
     });
+    triggerHaptic(16);
     updateUI();
   });
 
