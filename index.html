@@ -22,7 +22,7 @@
   <meta name="twitter:description" content="雙機 16×16 超大盤面、全方向連線兌獎、動態炸彈風險與三層獎池！來挑戰你的最高戰績！" />
   <meta name="twitter:image" content="https://markstar-tw.github.io/neon777-slot/main_logo.jpg" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>" />
-  <link rel="stylesheet" href="style.css?v=26.01.041" />
+  <link rel="stylesheet" href="style.css?v=26.01.042" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -195,6 +195,7 @@
             <button id="menuHomeBtn" class="menu-item" type="button">🏠 回到開始畫面</button>
             <button id="menuPaytableBtn" class="menu-item" type="button">📋 查看賠率表</button>
             <button id="menuLeaderboardBtn" class="menu-item" type="button">🏆 全球排行榜</button>
+            <button id="menuSettingsBtn" class="menu-item" type="button">⚙️ 設定與選項</button>
             <button id="menuChangelogBtn" class="menu-item" type="button">📜 更新日誌</button>
             <button id="menuDisableDevRestartBtn" class="menu-item" type="button" hidden>🔒 關閉開發者模式並重啟</button>
             <button id="menuSecretCodeBtn" class="menu-item mobile-only" type="button">🔑 輸入密技（手機版）</button>
@@ -287,7 +288,7 @@
 
     <footer class="site-footer">
       <p class="footer-brand">
-        <span id="appVersionText">v26.01.041</span> ｜
+        <span id="appVersionText">v26.01.042</span> ｜
         Made with <a href="https://antigravity.google/" target="_blank" rel="noopener noreferrer">Google Antigravity</a> ｜
         Hosted on <a href="https://github.com/markstar-tw/neon777-slot" target="_blank" rel="noopener noreferrer">GitHub</a>
       </p>
@@ -308,7 +309,7 @@
   <!-- 開始畫面 Overlay -->
   <div id="startScreen" class="overlay-screen">
     <div class="overlay-card start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
-      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.041</span></span>
+      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.042</span></span>
       <h2 id="startTitle" class="overlay-title">街霸拉機NEON777</h2>
       <p class="overlay-desc">雙機 16×16 街機拉霸！橫、直、左右斜線皆可兌獎（最高 8 連），各台獨立累積 GRAND JACKPOT，尋找極稀有 <img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /> 與 🀄！</p>
       <ul class="overlay-rules">
@@ -588,6 +589,23 @@
     </div>
   </div>
 
-  <script src="app.js?v=26.01.041"></script>
+  <!-- 設定與選項 Modal -->
+  <div id="settingsModal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+      <div class="modal-header">
+        <h2 id="settingsModalTitle">⚙️ 設定與選項</h2>
+        <button id="closeSettingsModalBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
+      </div>
+      <p class="modal-note">可隨時開啟或關閉遊戲音效（靜音）、手機震動與 Xbox 手把震動回饋。</p>
+      <div class="dev-btn-grid">
+        <button id="settingSoundBtn" class="ctrl-btn toggle active" type="button">🔊 遊戲音效：開</button>
+        <button id="settingMobileVibrateBtn" class="ctrl-btn toggle active" type="button">📳 手機震動：開</button>
+        <button id="settingGamepadRumbleBtn" class="ctrl-btn toggle active" type="button">🎮 手把震動：開</button>
+        <button id="settingGamepadInputBtn" class="ctrl-btn toggle active" type="button">🕹️ 搖桿控制：開</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=26.01.042"></script>
 </body>
 </html>
