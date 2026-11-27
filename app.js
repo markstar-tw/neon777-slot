@@ -1,5 +1,5 @@
 (() => {
-  const APP_VERSION = "26.01.031"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.032"; // 格式：年.大版本.小版本 (00.00.000)
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -141,7 +141,7 @@
     secretStarfallPending: false,
     secretUnlimitPending: false,
     secretFullBoardSymbol: null,
-    secretLineSymbol: null,
+    secretFullBoardRemaining: 0,
     cheatUsed: false,
     devFastSpin: false,
     devGodMode: false,
@@ -276,7 +276,7 @@
   const devForceDoubleBlackBtn = document.getElementById("devForceDoubleBlackBtn");
   const devFullSymbolSelect = document.getElementById("devFullSymbolSelect");
   const devForceFullSymbolBtn = document.getElementById("devForceFullSymbolBtn");
-  const devForceLineSymbolBtn = document.getElementById("devForceLineSymbolBtn");
+  const devForceFiveFullSymbolBtn = document.getElementById("devForceFiveFullSymbolBtn");
   const devClearPendingBtn = document.getElementById("devClearPendingBtn");
   const devCodesList = document.getElementById("devCodesList");
 
@@ -1292,6 +1292,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.032", time: "2026-11-27 17:28", desc: "系統體驗最佳化與問題修正。" },
     { ver: "v26.01.031", time: "2026-11-27 17:18", desc: "新增神祕彩蛋機制與系統體驗最佳化。" },
     { ver: "v26.01.030", time: "2026-11-27 17:14", desc: "新增遊戲中期（滿 8 轉或 5,000 點以上）幸運 7 加成，提高 777 與 77777 連線出線機率。" },
     { ver: "v26.01.029", time: "2026-11-27 16:12", desc: "轉盤全面高清化：升級 11 種街機向量 SVG 符號、放大盤面尺寸並移除滾動模糊。" },
@@ -1345,21 +1346,15 @@
 
   function refreshDevPanel() {
     if (!state.devUnlocked) return;
-    const fullBoardSym = state.secretFullBoardSymbol
+    const fullBoardSym = state.secretFullBoardRemaining > 0 && state.secretFullBoardSymbol
       ? (state.secretFullBoardSymbol === "random"
         ? { icon: "🎲", name: "隨機(除🇹🇼/🀄)" }
         : FULL_BOARD_ALLOWED_SYMBOLS.find((s) => s.id === state.secretFullBoardSymbol))
       : null;
-    const lineSym = state.secretLineSymbol
-      ? (state.secretLineSymbol === "random"
-        ? { icon: "🎲", name: "隨機(除🇹🇼/🀄)" }
-        : FULL_BOARD_ALLOWED_SYMBOLS.find((s) => s.id === state.secretLineSymbol))
-      : null;
 
     const pendingList = [
       state.secretStarfallPending && "⭐ 強制全盤星星 (STARFALL)",
-      fullBoardSym && `🌌 強制全盤 (${fullBoardSym.icon} ${fullBoardSym.name})`,
-      lineSym && `🎯 強制5連 (${lineSym.icon} ${lineSym.name})`,
+      fullBoardSym && `🌌 強制全盤 ×${state.secretFullBoardRemaining} 轉 (${fullBoardSym.icon} ${fullBoardSym.name})`,
       state.secretUnlimitPending && "♾️ 單次連線無上限 (UNLIMIT)",
       state.secretTaiwanPending && "🇹🇼 雙國旗相連",
       state.secretMahjongPending && "🀄 必出紅中",
@@ -1674,8 +1669,7 @@
     const triggerFiveSevens = state.secretFiveSevensPending;
     const triggerNuke = state.secretNukePending;
     const triggerStarfall = state.secretStarfallPending;
-    const triggerFullBoardSymbol = state.secretFullBoardSymbol;
-    const triggerLineSymbol = state.secretLineSymbol;
+    const triggerFullBoardSymbol = state.secretFullBoardRemaining > 0 ? state.secretFullBoardSymbol : null;
     const activeChainCap = state.secretUnlimitPending ? GRID_COLS : MAX_CHAIN_CAP;
 
     state.secretTaiwanPending = false;
@@ -1687,8 +1681,13 @@
     state.secretNukePending = false;
     state.secretStarfallPending = false;
     state.secretUnlimitPending = false;
-    state.secretFullBoardSymbol = null;
-    state.secretLineSymbol = null;
+    if (state.secretFullBoardRemaining > 0) {
+      state.secretFullBoardRemaining -= 1;
+      if (state.secretFullBoardRemaining <= 0) {
+        state.secretFullBoardRemaining = 0;
+        state.secretFullBoardSymbol = null;
+      }
+    }
 
     const hasAnyForcedEvent =
       triggerSecretTaiwan ||
@@ -1699,8 +1698,7 @@
       triggerFiveSevens ||
       triggerNuke ||
       triggerStarfall ||
-      Boolean(triggerFullBoardSymbol) ||
-      Boolean(triggerLineSymbol);
+      Boolean(triggerFullBoardSymbol);
 
     const naturalMiracleSym = !hasAnyForcedEvent && Math.random() < SECRET_MIRACLE_CHANCE
       ? pickSecretFullBoardSymbol("random")
@@ -1811,16 +1809,6 @@
         }
         board[2][2] = eightSym;
         board[12][12] = eightSym;
-      }
-
-      if (triggerLineSymbol && idx === 0) {
-        const chosenSym = pickSecretFullBoardSymbol(triggerLineSymbol);
-        if (chosenSym.id === "seven") replaceExtraTw(board, 0);
-        const r = Math.floor(Math.random() * GRID_ROWS);
-        const startC = Math.floor(Math.random() * (GRID_COLS - 5));
-        for (let k = 0; k < 5; k++) {
-          board[startC + k][r] = chosenSym;
-        }
       }
 
       if (triggerNuke && idx === 0 && !state.devBombShield) {
@@ -2426,12 +2414,14 @@
   devForceFullSymbolBtn.addEventListener("click", () => {
     markCheatActivated();
     state.secretFullBoardSymbol = devFullSymbolSelect.value || "random";
+    state.secretFullBoardRemaining = 1;
     refreshDevPanel();
   });
 
-  devForceLineSymbolBtn.addEventListener("click", () => {
+  devForceFiveFullSymbolBtn.addEventListener("click", () => {
     markCheatActivated();
-    state.secretLineSymbol = devFullSymbolSelect.value || "random";
+    state.secretFullBoardSymbol = devFullSymbolSelect.value || "random";
+    state.secretFullBoardRemaining = 5;
     refreshDevPanel();
   });
 
@@ -2446,7 +2436,7 @@
     state.secretStarfallPending = false;
     state.secretUnlimitPending = false;
     state.secretFullBoardSymbol = null;
-    state.secretLineSymbol = null;
+    state.secretFullBoardRemaining = 0;
     refreshDevPanel();
   });
 
