@@ -133,6 +133,13 @@ body {
   color: var(--neon-cyan);
 }
 
+.gamepad-btn.connected {
+  border-color: rgba(56, 242, 155, 0.75);
+  background: rgba(56, 242, 155, 0.16);
+  color: var(--neon-green);
+  box-shadow: 0 0 12px rgba(56, 242, 155, 0.25);
+}
+
 .dev-drawer {
   position: fixed;
   left: 16px;

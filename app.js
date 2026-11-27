@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.040"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.041"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -159,6 +159,8 @@
     devMobileCompact: false,
     devUnlocked: false,
     soundEnabled: true,
+    gamepadEnabled: true,
+    gamepadConnected: false,
     isUploadingLeaderboard: false,
     hasUploadedCurrentSettlement: false,
     adminSessionPass: null,
@@ -243,6 +245,12 @@
   const menuSecretCodeBtn = document.getElementById("menuSecretCodeBtn");
   const mobileFullscreenBtn = document.getElementById("mobileFullscreenBtn");
   const devPanelBtn = document.getElementById("devPanelBtn");
+  const gamepadStatusBtn = document.getElementById("gamepadStatusBtn");
+  const gamepadModal = document.getElementById("gamepadModal");
+  const closeGamepadModalBtn = document.getElementById("closeGamepadModalBtn");
+  const gamepadModalStatus = document.getElementById("gamepadModalStatus");
+  const gamepadToggleBtn = document.getElementById("gamepadToggleBtn");
+  const gamepadTestRumbleBtn = document.getElementById("gamepadTestRumbleBtn");
 
   const changelogModal = document.getElementById("changelogModal");
   const closeChangelogBtn = document.getElementById("closeChangelogBtn");
@@ -1342,6 +1350,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.041", time: "2026-11-27 19:06", desc: "新增 Xbox 搖桿相容模式，支援全按鈕操作與雙馬達震動回饋。" },
     { ver: "v26.01.040", time: "2026-11-27 19:03", desc: "優化手機版觸控震動回饋觸發時機，操作手感更即時。" },
     { ver: "v26.01.039", time: "2026-11-27 18:49", desc: "介面精簡與系統體驗最佳化。" },
     { ver: "v26.01.038", time: "2026-11-27 18:45", desc: "排行榜新增玩家隨機識別碼（#XXXX）與前 30 名自動清理機制最佳化。" },
@@ -1955,7 +1964,30 @@
     link.click();
   }
 
+  function triggerGamepadRumble(durationMs = 80, weak = 0.25, strong = 0.45) {
+    if (!state.gamepadEnabled || typeof navigator === "undefined" || !navigator.getGamepads) return;
+    const pads = navigator.getGamepads();
+    for (const pad of pads) {
+      if (pad && pad.connected && pad.vibrationActuator && typeof pad.vibrationActuator.playEffect === "function") {
+        try {
+          pad.vibrationActuator.playEffect("dual-rumble", {
+            startDelay: 0,
+            duration: durationMs,
+            weakMagnitude: weak,
+            strongMagnitude: strong
+          });
+        } catch (_) {
+          // 忽略部分瀏覽器或手把不支援 playEffect 之例外
+        }
+      }
+    }
+  }
+
   function triggerHaptic(pattern = 20) {
+    if (state.gamepadConnected) {
+      const isStrong = Array.isArray(pattern) && pattern.length >= 3;
+      triggerGamepadRumble(isStrong ? 180 : 65, isStrong ? 0.45 : 0.2, isStrong ? 0.85 : 0.35);
+    }
     if (!state.devMobileVibrate || typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
     try {
       navigator.vibrate(pattern);
@@ -3063,6 +3095,7 @@
       !changelogModal.hidden ||
       !leaderboardModal.hidden ||
       !adminModal.hidden ||
+      !gamepadModal.hidden ||
       !paytableModal.hidden;
     if (e.code === "Space" && !anyOverlayOpen && !anyAutoActive() && !state.isSettled) {
       e.preventDefault();
@@ -3072,11 +3105,172 @@
       if (!changelogModal.hidden) changelogModal.hidden = true;
       if (!leaderboardModal.hidden) leaderboardModal.hidden = true;
       if (!adminModal.hidden) adminModal.hidden = true;
+      if (!gamepadModal.hidden) gamepadModal.hidden = true;
       if (!mobileCodeModal.hidden) mobileCodeModal.hidden = true;
       if (!devPanelModal.hidden) devPanelModal.hidden = true;
       if (!gameMenu.hidden) closeMenu();
     }
   });
+
+  // Xbox / Gamepad API 相容模式輪詢與對應
+  let gamepadRafId = null;
+  let prevPadButtons = [];
+  let prevStickDir = 0;
+
+  function updateGamepadUI() {
+    if (!navigator.getGamepads) return;
+    const pads = Array.from(navigator.getGamepads()).filter((p) => p && p.connected);
+    state.gamepadConnected = pads.length > 0;
+    if (gamepadStatusBtn) {
+      gamepadStatusBtn.classList.toggle("connected", state.gamepadConnected && state.gamepadEnabled);
+      gamepadStatusBtn.textContent = state.gamepadConnected
+        ? (state.gamepadEnabled ? "🎮 Xbox 已連線" : "🎮 搖桿已暫停")
+        : "🎮 搖桿";
+    }
+    if (gamepadModalStatus) {
+      gamepadModalStatus.textContent = state.gamepadConnected
+        ? `已連線：${pads[0].id}`
+        : "請透過藍牙或 USB 連接 Xbox 搖桿後，按下手把任意鍵自動啟用。";
+    }
+    if (gamepadToggleBtn) {
+      gamepadToggleBtn.classList.toggle("active", state.gamepadEnabled);
+      gamepadToggleBtn.textContent = state.gamepadEnabled ? "🎮 搖桿控制：開" : "🎮 搖桿控制：關";
+    }
+  }
+
+  function closeTopmostModalForPad() {
+    if (!gamepadModal.hidden) { gamepadModal.hidden = true; return true; }
+    if (!paytableModal.hidden) { paytableModal.hidden = true; return true; }
+    if (!changelogModal.hidden) { changelogModal.hidden = true; return true; }
+    if (!leaderboardModal.hidden) { leaderboardModal.hidden = true; return true; }
+    if (!mobileCodeModal.hidden) { mobileCodeModal.hidden = true; return true; }
+    if (!adminModal.hidden) { adminModal.hidden = true; return true; }
+    if (!gameMenu.hidden) { closeMenu(); return true; }
+    return false;
+  }
+
+  function handleGamepadAction(btnIdx) {
+    if (!state.gamepadEnabled) return;
+    // A 鍵 (0)：處理 Overlay 主按鈕或雙機齊發
+    if (btnIdx === 0) {
+      if (!startScreen.hidden) { startGameBtn.click(); return; }
+      if (!gameOverScreen.hidden) { gameOverRestartBtn.click(); return; }
+      if (!settlementScreen.hidden) { settleRestartBtn.click(); return; }
+      if (!anyAutoActive() && !state.isSettled) runSpin(machines);
+      return;
+    }
+    // B 鍵 (1)：優先關閉開啟中的彈窗，否則單轉拉機 B
+    if (btnIdx === 1) {
+      if (closeTopmostModalForPad()) return;
+      if (startScreen.hidden && gameOverScreen.hidden && settlementScreen.hidden && !anyAutoActive() && !state.isSettled) {
+        runSpin([machines[1]]);
+      }
+      return;
+    }
+    if (!startScreen.hidden || !gameOverScreen.hidden || !settlementScreen.hidden) return;
+
+    if (btnIdx === 2) {
+      if (!anyAutoActive() && !state.isSettled) runSpin([machines[0]]); // X: 拉機 A
+    } else if (btnIdx === 3) {
+      if (!anySpinning() && !state.isSettled) burstSpinBtn.click(); // Y: 連轉 ×5
+    } else if (btnIdx === 4 || btnIdx === 14) {
+      betDownBtn.click(); // LB / 左: 減注
+    } else if (btnIdx === 5 || btnIdx === 15) {
+      betUpBtn.click(); // RB / 右: 加注
+    } else if (btnIdx === 6 || btnIdx === 12) {
+      maxBetBtn.click(); // LT / 上: 動態上限
+    } else if (btnIdx === 7 || btnIdx === 13) {
+      const modeList = Array.from(betModeBtns);
+      const curIdx = modeList.findIndex((b) => b.classList.contains("active"));
+      const nextBtn = modeList[(curIdx + 1) % modeList.length];
+      if (nextBtn) nextBtn.click(); // RT / 下: 切換押注模式
+    } else if (btnIdx === 8) {
+      soundToggle.click(); // View: 音效開關
+    } else if (btnIdx === 9) {
+      menuBtn.click(); // Menu: 開關選單
+    }
+  }
+
+  function pollGamepads() {
+    if (!navigator.getGamepads) {
+      gamepadRafId = null;
+      return;
+    }
+    const pads = Array.from(navigator.getGamepads()).filter((p) => p && p.connected);
+    if (pads.length === 0) {
+      state.gamepadConnected = false;
+      updateGamepadUI();
+      gamepadRafId = null;
+      return;
+    }
+
+    const pad = pads[0];
+    if (!state.gamepadConnected) updateGamepadUI();
+
+    pad.buttons.forEach((btn, idx) => {
+      const pressed = Boolean(btn && btn.pressed);
+      if (pressed && !prevPadButtons[idx]) {
+        handleGamepadAction(idx);
+      }
+      prevPadButtons[idx] = pressed;
+    });
+
+    const axisX = pad.axes && pad.axes.length > 0 ? pad.axes[0] : 0;
+    const stickDir = axisX < -0.55 ? -1 : axisX > 0.55 ? 1 : 0;
+    if (stickDir !== 0 && stickDir !== prevStickDir && state.gamepadEnabled) {
+      if (stickDir < 0) betDownBtn.click();
+      else betUpBtn.click();
+    }
+    prevStickDir = stickDir;
+
+    gamepadRafId = window.requestAnimationFrame(pollGamepads);
+  }
+
+  function startGamepadPolling() {
+    updateGamepadUI();
+    if (!gamepadRafId) {
+      gamepadRafId = window.requestAnimationFrame(pollGamepads);
+    }
+  }
+
+  window.addEventListener("gamepadconnected", () => {
+    startGamepadPolling();
+    triggerGamepadRumble(100, 0.3, 0.5);
+  });
+
+  window.addEventListener("gamepaddisconnected", () => {
+    prevPadButtons = [];
+    prevStickDir = 0;
+    updateGamepadUI();
+  });
+
+  if (gamepadStatusBtn) {
+    gamepadStatusBtn.addEventListener("click", () => {
+      updateGamepadUI();
+      gamepadModal.hidden = false;
+    });
+  }
+  if (closeGamepadModalBtn) {
+    closeGamepadModalBtn.addEventListener("click", () => {
+      gamepadModal.hidden = true;
+    });
+  }
+  if (gamepadModal) {
+    gamepadModal.addEventListener("click", (e) => {
+      if (e.target === gamepadModal) gamepadModal.hidden = true;
+    });
+  }
+  if (gamepadToggleBtn) {
+    gamepadToggleBtn.addEventListener("click", () => {
+      state.gamepadEnabled = !state.gamepadEnabled;
+      updateGamepadUI();
+    });
+  }
+  if (gamepadTestRumbleBtn) {
+    gamepadTestRumbleBtn.addEventListener("click", () => {
+      triggerGamepadRumble(160, 0.45, 0.85);
+    });
+  }
 
   // 初始化
   const appVersionEl = document.getElementById("appVersionText");
@@ -3087,4 +3281,7 @@
   renderPaytable();
   updateUI();
   fetchAndRenderLeaderboard();
+  if (navigator.getGamepads && Array.from(navigator.getGamepads()).some((p) => p && p.connected)) {
+    startGamepadPolling();
+  }
 })();

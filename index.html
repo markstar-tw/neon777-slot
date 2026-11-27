@@ -22,7 +22,7 @@
   <meta name="twitter:description" content="雙機 16×16 超大盤面、全方向連線兌獎、動態炸彈風險與三層獎池！來挑戰你的最高戰績！" />
   <meta name="twitter:image" content="https://markstar-tw.github.io/neon777-slot/main_logo.jpg" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>" />
-  <link rel="stylesheet" href="style.css?v=26.01.040" />
+  <link rel="stylesheet" href="style.css?v=26.01.041" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -179,6 +179,9 @@
         <button id="devPanelBtn" class="icon-btn dev-top-btn" type="button" hidden>
           🛠️ 開發者
         </button>
+        <button id="gamepadStatusBtn" class="icon-btn gamepad-btn" type="button" title="Xbox / 遊戲搖桿相容模式與按鍵說明">
+          🎮 搖桿
+        </button>
         <button id="soundToggle" class="icon-btn" type="button" aria-label="切換音效">
           🔊 音效開
         </button>
@@ -284,7 +287,7 @@
 
     <footer class="site-footer">
       <p class="footer-brand">
-        <span id="appVersionText">v26.01.040</span> ｜
+        <span id="appVersionText">v26.01.041</span> ｜
         Made with <a href="https://antigravity.google/" target="_blank" rel="noopener noreferrer">Google Antigravity</a> ｜
         Hosted on <a href="https://github.com/markstar-tw/neon777-slot" target="_blank" rel="noopener noreferrer">GitHub</a>
       </p>
@@ -305,7 +308,7 @@
   <!-- 開始畫面 Overlay -->
   <div id="startScreen" class="overlay-screen">
     <div class="overlay-card start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
-      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.040</span></span>
+      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.041</span></span>
       <h2 id="startTitle" class="overlay-title">街霸拉機NEON777</h2>
       <p class="overlay-desc">雙機 16×16 街機拉霸！橫、直、左右斜線皆可兌獎（最高 8 連），各台獨立累積 GRAND JACKPOT，尋找極稀有 <img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /> 與 🀄！</p>
       <ul class="overlay-rules">
@@ -561,6 +564,30 @@
     </div>
   </div>
 
-  <script src="app.js?v=26.01.040"></script>
+  <!-- Xbox 搖桿相容模式說明 Modal -->
+  <div id="gamepadModal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="gamepadModalTitle">
+      <div class="modal-header">
+        <h2 id="gamepadModalTitle">🎮 Xbox 搖桿相容模式</h2>
+        <button id="closeGamepadModalBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
+      </div>
+      <p id="gamepadModalStatus" class="modal-note">請透過藍牙或 USB 連接 Xbox 搖桿後，按下手把任意鍵自動啟用。</p>
+      <div class="paytable-grid">
+        <div class="paytable-row"><span><strong>A 鍵</strong></span><span>雙機齊發 / 確認開始或重開</span></div>
+        <div class="paytable-row"><span><strong>X 鍵 / B 鍵</strong></span><span>單轉拉機 A / 單轉拉機 B（或關閉彈窗）</span></div>
+        <div class="paytable-row"><span><strong>Y 鍵</strong></span><span>🔥 連轉 ×5（省 10%）</span></div>
+        <div class="paytable-row"><span><strong>LB / RB（或左右鍵）</strong></span><span>− 減注 / + 加注</span></div>
+        <div class="paytable-row"><span><strong>LT / 十字鍵上</strong></span><span>套用動態押注上限</span></div>
+        <div class="paytable-row"><span><strong>RT / 十字鍵下</strong></span><span>切換押注模式（一般 / 最高 / ALL IN）</span></div>
+        <div class="paytable-row"><span><strong>View / Menu 鍵</strong></span><span>切換音效 / 開關選單</span></div>
+      </div>
+      <div class="overlay-actions">
+        <button id="gamepadToggleBtn" class="ctrl-btn toggle active" type="button">🎮 搖桿控制：開</button>
+        <button id="gamepadTestRumbleBtn" class="ctrl-btn" type="button">📳 測試手把震動</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=26.01.041"></script>
 </body>
 </html>
