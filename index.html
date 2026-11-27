@@ -22,7 +22,7 @@
   <meta name="twitter:description" content="雙機 16×16 超大盤面、全方向連線兌獎、動態炸彈風險與三層獎池！來挑戰你的最高戰績！" />
   <meta name="twitter:image" content="https://markstar-tw.github.io/neon777-slot/main_logo.jpg" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>" />
-  <link rel="stylesheet" href="style.css?v=26.01.036" />
+  <link rel="stylesheet" href="style.css?v=26.01.037" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -283,7 +283,7 @@
 
     <footer class="site-footer">
       <p class="footer-brand">
-        <span id="appVersionText">v26.01.036</span> ｜
+        <span id="appVersionText">v26.01.037</span> ｜
         Made with <a href="https://antigravity.google/" target="_blank" rel="noopener noreferrer">Google Antigravity</a> ｜
         Hosted on <a href="https://github.com/markstar-tw/neon777-slot" target="_blank" rel="noopener noreferrer">GitHub</a>
       </p>
@@ -304,7 +304,7 @@
   <!-- 開始畫面 Overlay -->
   <div id="startScreen" class="overlay-screen">
     <div class="overlay-card start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
-      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.036</span></span>
+      <span class="brand-badge">DUAL 16×16 ARCADE • <span id="startVersionText">v26.01.037</span></span>
       <h2 id="startTitle" class="overlay-title">街霸拉機NEON777</h2>
       <p class="overlay-desc">雙機 16×16 街機拉霸！橫、直、左右斜線皆可兌獎（最高 8 連），各台獨立累積 GRAND JACKPOT，尋找極稀有 <img class="tw-flag-img" src="Flag_of_the_Republic_of_China.svg" alt="🇹🇼" /> 與 🀄！</p>
       <ul class="overlay-rules">
@@ -413,7 +413,10 @@
       </div>
       <div class="dev-stats-wrap">
         <div id="devStatsBox" class="dev-stats"></div>
-        <button id="devRefreshStatsBtn" class="ctrl-btn dev-refresh-btn" type="button">🔄 立即刷新狀態</button>
+        <div class="dev-btn-grid">
+          <button id="devRefreshStatsBtn" class="ctrl-btn dev-refresh-btn" type="button">🔄 立即刷新狀態</button>
+          <button id="devOpenAdminBtn" class="ctrl-btn burst-btn dev-refresh-btn" type="button">🔐 管理員後台</button>
+        </div>
       </div>
       <div class="dev-section">
         <h3>數值與系統開關</h3>
@@ -522,6 +525,42 @@
     </div>
   </div>
 
-  <script src="app.js?v=26.01.036"></script>
+  <!-- 管理員後台 Modal（僅開發者模式可開啟） -->
+  <div id="adminModal" class="modal-backdrop" hidden>
+    <div class="modal-card admin-card" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+      <div class="modal-header">
+        <h2 id="adminModalTitle">🔐 管理員後台</h2>
+        <button id="closeAdminModalBtn" class="icon-btn" type="button" aria-label="關閉">✕</button>
+      </div>
+
+      <div id="adminLoginView" class="admin-login-box">
+        <p class="modal-note">請輸入管理員密碼以管理全球排行榜與營運數據。</p>
+        <div class="leaderboard-form-row">
+          <input id="adminPasswordInput" class="mobile-code-input leaderboard-input" type="password" placeholder="輸入管理員密碼..." autocomplete="off" />
+          <button id="adminLoginBtn" class="ctrl-btn burst-btn" type="button">🔓 登入後台</button>
+        </div>
+        <p id="adminLoginFeedback" class="leaderboard-feedback"></p>
+      </div>
+
+      <div id="adminDashboardView" class="admin-dashboard" hidden>
+        <div class="admin-topbar">
+          <span class="admin-auth-badge">🟢 已認證管理員</span>
+          <button id="adminLogoutBtn" class="ctrl-btn" type="button">🚪 登出後台</button>
+        </div>
+        <div id="adminSummaryBox" class="admin-summary-grid"></div>
+        <div class="admin-toolbar">
+          <button id="adminRefreshBtn" class="ctrl-btn" type="button">🔄 刷新榜單</button>
+          <button id="adminAddRowBtn" class="ctrl-btn" type="button">➕ 新增紀錄</button>
+          <button id="adminExportCsvBtn" class="ctrl-btn" type="button">📥 匯出 CSV</button>
+        </div>
+        <p id="adminActionFeedback" class="leaderboard-feedback"></p>
+        <div id="adminLeaderboardList" class="admin-list">
+          <div class="leaderboard-empty">載入中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=26.01.037"></script>
 </body>
 </html>

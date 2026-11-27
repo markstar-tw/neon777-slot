@@ -5,7 +5,8 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.036"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.037"; // 格式：年.大版本.小版本 (00.00.000)
+  const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
   const STRIP_LENGTH = 68; // 拉長轉輪長度，讓單次轉動更有情緒張力與累積感
@@ -159,7 +160,9 @@
     devUnlocked: false,
     soundEnabled: true,
     isUploadingLeaderboard: false,
-    hasUploadedCurrentSettlement: false
+    hasUploadedCurrentSettlement: false,
+    adminSessionPass: null,
+    adminCachedRows: []
   };
 
   // 動態押注限制演算法：依目前總餘額與啟用機台數動態計算可壓上限（每台最多壓單台可用額度的 25%）
@@ -281,6 +284,21 @@
   const closeDevPanelBtn = document.getElementById("closeDevPanelBtn");
   const devStatsBox = document.getElementById("devStatsBox");
   const devRefreshStatsBtn = document.getElementById("devRefreshStatsBtn");
+  const devOpenAdminBtn = document.getElementById("devOpenAdminBtn");
+  const adminModal = document.getElementById("adminModal");
+  const closeAdminModalBtn = document.getElementById("closeAdminModalBtn");
+  const adminLoginView = document.getElementById("adminLoginView");
+  const adminDashboardView = document.getElementById("adminDashboardView");
+  const adminPasswordInput = document.getElementById("adminPasswordInput");
+  const adminLoginBtn = document.getElementById("adminLoginBtn");
+  const adminLoginFeedback = document.getElementById("adminLoginFeedback");
+  const adminLogoutBtn = document.getElementById("adminLogoutBtn");
+  const adminSummaryBox = document.getElementById("adminSummaryBox");
+  const adminRefreshBtn = document.getElementById("adminRefreshBtn");
+  const adminAddRowBtn = document.getElementById("adminAddRowBtn");
+  const adminExportCsvBtn = document.getElementById("adminExportCsvBtn");
+  const adminActionFeedback = document.getElementById("adminActionFeedback");
+  const adminLeaderboardList = document.getElementById("adminLeaderboardList");
   const devCustomCreditsInput = document.getElementById("devCustomCreditsInput");
   const devAddCustomBtn = document.getElementById("devAddCustomBtn");
   const devAdd10kBtn = document.getElementById("devAdd10kBtn");
@@ -1324,6 +1342,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.037", time: "2026-11-27 18:38", desc: "系統安全性強化與後端管理維護工具更新。" },
     { ver: "v26.01.036", time: "2026-11-27 18:27", desc: "選單新增「🏆 全球排行榜」，遊戲中可隨時查看 TOP 10。" },
     { ver: "v26.01.035", time: "2026-11-27 18:20", desc: "新增 Supabase 全球排行榜 TOP 10 與結算成績上傳功能。" },
     { ver: "v26.01.034", time: "2026-11-27 18:00", desc: "調整重複觸發 JACKPOT 規則：首個領取完整獎池，其餘重複次數給予初始獎池金額。" },
@@ -1526,6 +1545,8 @@
     state.secretUnlimitPending = false;
     state.secretFullBoardSymbol = null;
     state.secretFullBoardRemaining = 0;
+    state.adminSessionPass = null;
+    if (adminModal) adminModal.hidden = true;
     devPanelBtn.hidden = true;
     devPanelModal.hidden = true;
     restartGame({ showStart: false });
@@ -1676,6 +1697,131 @@
       leaderboardSubmitFeedback.className = "leaderboard-feedback error";
     } finally {
       state.isUploadingLeaderboard = false;
+    }
+  }
+
+  async function sha256Hex(text) {
+    const data = new TextEncoder().encode(text);
+    const digest = await window.crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  function renderAdminView() {
+    const authed = Boolean(state.adminSessionPass);
+    adminLoginView.hidden = authed;
+    adminDashboardView.hidden = !authed;
+    if (!authed) {
+      adminPasswordInput.value = "";
+      adminLoginFeedback.textContent = "";
+      adminLoginFeedback.className = "leaderboard-feedback";
+    }
+  }
+
+  async function loadAdminLeaderboard() {
+    if (!state.devUnlocked || !state.adminSessionPass) return;
+    if (!supabaseClient) {
+      adminLeaderboardList.innerHTML = `<div class="leaderboard-empty">⚠️ 尚未連線至 Supabase</div>`;
+      return;
+    }
+    adminLeaderboardList.innerHTML = `<div class="leaderboard-empty">讀取完整排行榜中...</div>`;
+    try {
+      const { data, error } = await supabaseClient
+        .from("leaderboard")
+        .select("id, player_name, score, created_at")
+        .order("score", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+
+      const rows = data || [];
+      state.adminCachedRows = rows;
+      const topScore = rows.length ? Number(rows[0].score || 0) : 0;
+      const top10Slice = rows.slice(0, 10);
+      const top10Avg = top10Slice.length
+        ? Math.round(top10Slice.reduce((sum, r) => sum + Number(r.score || 0), 0) / top10Slice.length)
+        : 0;
+
+      adminSummaryBox.innerHTML = `
+        <div class="admin-stat-box">
+          <span class="admin-stat-label">排行榜總筆數</span>
+          <span class="admin-stat-val">${rows.length}${rows.length === 100 ? "+" : ""}</span>
+        </div>
+        <div class="admin-stat-box">
+          <span class="admin-stat-label">最高分紀錄</span>
+          <span class="admin-stat-val">${topScore.toLocaleString()}</span>
+        </div>
+        <div class="admin-stat-box">
+          <span class="admin-stat-label">前 10 名均分</span>
+          <span class="admin-stat-val">${top10Avg.toLocaleString()}</span>
+        </div>
+      `;
+
+      if (rows.length === 0) {
+        adminLeaderboardList.innerHTML = `<div class="leaderboard-empty">目前排行榜尚無資料</div>`;
+        return;
+      }
+
+      adminLeaderboardList.innerHTML = rows.map((row, idx) => {
+        const timeStr = row.created_at
+          ? new Date(row.created_at).toLocaleString("zh-TW", { hour12: false })
+          : "";
+        return `
+          <div class="admin-row">
+            <span class="leaderboard-rank">#${idx + 1}</span>
+            <div class="admin-row-main">
+              <span class="admin-row-name">${escapeHtml(row.player_name)}</span>
+              <span class="admin-row-meta">ID:${row.id} • ${escapeHtml(timeStr)}</span>
+            </div>
+            <span class="leaderboard-score">${Number(row.score || 0).toLocaleString()}</span>
+            <div class="admin-row-actions">
+              <button class="ctrl-btn admin-mini-btn" type="button" data-admin-edit="${row.id}">✏️</button>
+              <button class="ctrl-btn admin-mini-btn danger" type="button" data-admin-del="${row.id}">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    } catch (err) {
+      console.error("管理員讀取排行榜失敗：", err);
+      adminLeaderboardList.innerHTML = `<div class="leaderboard-empty">⚠️ 讀取失敗，請稍後再試</div>`;
+    }
+  }
+
+  async function handleAdminLogin() {
+    if (!state.devUnlocked) return;
+    const rawPass = adminPasswordInput.value;
+    if (!rawPass) {
+      adminLoginFeedback.textContent = "⚠️ 請輸入密碼。";
+      adminLoginFeedback.className = "leaderboard-feedback error";
+      return;
+    }
+    try {
+      const hash = await sha256Hex(rawPass);
+      if (hash !== ADMIN_PASS_HASH) {
+        adminLoginFeedback.textContent = "❌ 密碼錯誤，請再試一次。";
+        adminLoginFeedback.className = "leaderboard-feedback error";
+        adminPasswordInput.select();
+        return;
+      }
+      state.adminSessionPass = rawPass;
+      adminActionFeedback.textContent = "";
+      renderAdminView();
+      await loadAdminLeaderboard();
+    } catch (err) {
+      console.error("密碼驗證失敗：", err);
+      adminLoginFeedback.textContent = "⚠️ 瀏覽器不支援加密驗證。";
+      adminLoginFeedback.className = "leaderboard-feedback error";
+    }
+  }
+
+  function openAdminModal() {
+    if (!state.devUnlocked) return;
+    renderAdminView();
+    adminModal.hidden = false;
+    if (state.adminSessionPass) {
+      loadAdminLeaderboard();
+    } else {
+      setTimeout(() => adminPasswordInput.focus(), 40);
     }
   }
 
@@ -2452,6 +2598,125 @@
   if (modalLeaderboardRefreshBtn) {
     modalLeaderboardRefreshBtn.addEventListener("click", fetchAndRenderLeaderboard);
   }
+  if (devOpenAdminBtn) {
+    devOpenAdminBtn.addEventListener("click", openAdminModal);
+  }
+  if (closeAdminModalBtn) {
+    closeAdminModalBtn.addEventListener("click", () => {
+      adminModal.hidden = true;
+    });
+  }
+  if (adminModal) {
+    adminModal.addEventListener("click", (e) => {
+      if (e.target === adminModal) adminModal.hidden = true;
+    });
+  }
+  if (adminLoginBtn) {
+    adminLoginBtn.addEventListener("click", handleAdminLogin);
+  }
+  if (adminPasswordInput) {
+    adminPasswordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleAdminLogin();
+      }
+    });
+  }
+  if (adminLogoutBtn) {
+    adminLogoutBtn.addEventListener("click", () => {
+      state.adminSessionPass = null;
+      renderAdminView();
+    });
+  }
+  if (adminRefreshBtn) {
+    adminRefreshBtn.addEventListener("click", loadAdminLeaderboard);
+  }
+  if (adminAddRowBtn) {
+    adminAddRowBtn.addEventListener("click", async () => {
+      if (!state.devUnlocked || !state.adminSessionPass || !supabaseClient) return;
+      const name = (window.prompt("請輸入玩家暱稱（最多 20 字）：") || "").trim();
+      if (!name || name.length > 20) return;
+      const scoreRaw = window.prompt("請輸入分數（大於等於 0 的整數）：");
+      if (scoreRaw === null) return;
+      const score = Math.floor(Number(scoreRaw));
+      if (!Number.isFinite(score) || score < 0) return;
+      const { error } = await supabaseClient
+        .from("leaderboard")
+        .insert([{ player_name: name, score }]);
+      if (error) {
+        adminActionFeedback.textContent = `⚠️ 新增失敗：${error.message}`;
+        adminActionFeedback.className = "leaderboard-feedback error";
+        return;
+      }
+      adminActionFeedback.textContent = `✅ 已新增 ${name}（${score.toLocaleString()}）`;
+      adminActionFeedback.className = "leaderboard-feedback success";
+      await Promise.all([loadAdminLeaderboard(), fetchAndRenderLeaderboard()]);
+    });
+  }
+  if (adminExportCsvBtn) {
+    adminExportCsvBtn.addEventListener("click", () => {
+      if (!state.devUnlocked || !state.adminSessionPass) return;
+      const header = "rank,id,player_name,score,created_at\n";
+      const lines = state.adminCachedRows.map((r, i) => {
+        const safeName = `"${String(r.player_name || "").replaceAll('"', '""')}"`;
+        return `${i + 1},${r.id},${safeName},${r.score},${r.created_at || ""}`;
+      });
+      const blob = new Blob(["\uFEFF" + header + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `neon777-leaderboard-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+  if (adminLeaderboardList) {
+    adminLeaderboardList.addEventListener("click", async (e) => {
+      if (!state.devUnlocked || !state.adminSessionPass || !supabaseClient) return;
+      const editBtn = e.target.closest("[data-admin-edit]");
+      const delBtn = e.target.closest("[data-admin-del]");
+      if (editBtn) {
+        const id = Number(editBtn.dataset.adminEdit);
+        const targetRow = state.adminCachedRows.find((r) => r.id === id);
+        if (!targetRow) return;
+        const nextName = (window.prompt("修改玩家暱稱（最多 20 字）：", targetRow.player_name) || "").trim();
+        if (!nextName || nextName.length > 20) return;
+        const nextScoreRaw = window.prompt("修改分數：", String(targetRow.score));
+        if (nextScoreRaw === null) return;
+        const nextScore = Math.floor(Number(nextScoreRaw));
+        if (!Number.isFinite(nextScore) || nextScore < 0) return;
+        const { error } = await supabaseClient.rpc("admin_update_leaderboard", {
+          admin_pass: state.adminSessionPass,
+          row_id: id,
+          new_name: nextName,
+          new_score: nextScore
+        });
+        if (error) {
+          adminActionFeedback.textContent = `⚠️ 修改失敗：${error.message}（需先於 Supabase 建立管理員 RPC 函式）`;
+          adminActionFeedback.className = "leaderboard-feedback error";
+          return;
+        }
+        adminActionFeedback.textContent = `✅ 已更新 ID:${id}`;
+        adminActionFeedback.className = "leaderboard-feedback success";
+        await Promise.all([loadAdminLeaderboard(), fetchAndRenderLeaderboard()]);
+      } else if (delBtn) {
+        const id = Number(delBtn.dataset.adminDel);
+        if (!window.confirm(`確定要刪除排行榜 ID:${id} 的紀錄嗎？`)) return;
+        const { error } = await supabaseClient.rpc("admin_delete_leaderboard", {
+          admin_pass: state.adminSessionPass,
+          row_id: id
+        });
+        if (error) {
+          adminActionFeedback.textContent = `⚠️ 刪除失敗：${error.message}（需先於 Supabase 建立管理員 RPC 函式）`;
+          adminActionFeedback.className = "leaderboard-feedback error";
+          return;
+        }
+        adminActionFeedback.textContent = `🗑️ 已刪除 ID:${id}`;
+        adminActionFeedback.className = "leaderboard-feedback success";
+        await Promise.all([loadAdminLeaderboard(), fetchAndRenderLeaderboard()]);
+      }
+    });
+  }
 
   gameOverDisableDevRestartBtn.addEventListener("click", disableDevAndRestart);
   settleDisableDevRestartBtn.addEventListener("click", disableDevAndRestart);
@@ -2767,6 +3032,7 @@
       !mobileCodeModal.hidden ||
       !changelogModal.hidden ||
       !leaderboardModal.hidden ||
+      !adminModal.hidden ||
       !paytableModal.hidden;
     if (e.code === "Space" && !anyOverlayOpen && !anyAutoActive() && !state.isSettled) {
       e.preventDefault();
@@ -2775,6 +3041,7 @@
       if (!paytableModal.hidden) paytableModal.hidden = true;
       if (!changelogModal.hidden) changelogModal.hidden = true;
       if (!leaderboardModal.hidden) leaderboardModal.hidden = true;
+      if (!adminModal.hidden) adminModal.hidden = true;
       if (!mobileCodeModal.hidden) mobileCodeModal.hidden = true;
       if (!devPanelModal.hidden) devPanelModal.hidden = true;
       if (!gameMenu.hidden) closeMenu();
