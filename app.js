@@ -5,7 +5,7 @@
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
     : null;
 
-  const APP_VERSION = "26.01.042"; // 格式：年.大版本.小版本 (00.00.000)
+  const APP_VERSION = "26.01.043"; // 格式：年.大版本.小版本 (00.00.000)
   const ADMIN_PASS_HASH = "d1aa55811ebb21d1377cfb72fab3bcf7e00d616494b0af754f56aeae4b1d6d4d";
   const GRID_COLS = 16;
   const GRID_ROWS = 16;
@@ -271,7 +271,6 @@
   const mobileCodeSubmitBtn = document.getElementById("mobileCodeSubmitBtn");
   const mobileCodeFeedback = document.getElementById("mobileCodeFeedback");
 
-  const devMobileVibrateBtn = document.getElementById("devMobileVibrateBtn");
   const devMobileBigBtn = document.getElementById("devMobileBigBtn");
   const devMobileCompactBtn = document.getElementById("devMobileCompactBtn");
 
@@ -1359,6 +1358,7 @@
   }
 
   const CHANGELOG_ENTRIES = [
+    { ver: "v26.01.043", time: "2026-11-27 19:09", desc: "介面精簡與設定選項整合最佳化。" },
     { ver: "v26.01.042", time: "2026-11-27 19:08", desc: "選單新增「⚙️ 設定與選項」（含靜音、手機震動與手把震動開關），並加入轉輪停止震動回饋。" },
     { ver: "v26.01.041", time: "2026-11-27 19:06", desc: "新增 Xbox 搖桿相容模式，支援全按鈕操作與雙馬達震動回饋。" },
     { ver: "v26.01.040", time: "2026-11-27 19:03", desc: "優化手機版觸控震動回饋觸發時機，操作手感更即時。" },
@@ -1478,8 +1478,6 @@
     devBombShieldBtn.textContent = state.devBombShield ? "🛡️ 炸彈護盾：開" : "🛡️ 炸彈護盾：關";
     devNoZeroEndBtn.classList.toggle("active", state.devNoZeroEnd);
     devNoZeroEndBtn.textContent = state.devNoZeroEnd ? "♾️ 0元不結束：開" : "♾️ 0元不結束：關";
-    devMobileVibrateBtn.classList.toggle("active", state.devMobileVibrate);
-    devMobileVibrateBtn.textContent = state.devMobileVibrate ? "📳 震動回饋：開" : "📳 震動回饋：關";
     devMobileBigBtn.classList.toggle("active", state.devMobileBigBtn);
     devMobileBigBtn.textContent = state.devMobileBigBtn ? "🖐️ 單手大按鈕：開" : "🖐️ 單手大按鈕：關";
     devMobileCompactBtn.classList.toggle("active", state.devMobileCompact);
@@ -2882,12 +2880,6 @@
     }
   });
 
-  devMobileVibrateBtn.addEventListener("click", () => {
-    state.devMobileVibrate = !state.devMobileVibrate;
-    if (state.devMobileVibrate && navigator.vibrate) navigator.vibrate(50);
-    refreshDevPanel();
-  });
-
   devMobileBigBtn.addEventListener("click", () => {
     state.devMobileBigBtn = !state.devMobileBigBtn;
     refreshDevPanel();
@@ -3065,10 +3057,6 @@
     if (settingGamepadInputBtn) {
       settingGamepadInputBtn.classList.toggle("active", state.gamepadEnabled);
       settingGamepadInputBtn.textContent = state.gamepadEnabled ? "🕹️ 搖桿控制：開" : "🕹️ 搖桿控制：關";
-    }
-    if (devMobileVibrateBtn) {
-      devMobileVibrateBtn.classList.toggle("active", state.devMobileVibrate);
-      devMobileVibrateBtn.textContent = state.devMobileVibrate ? "📳 震動回饋：開" : "📳 震動回饋：關";
     }
   }
 
